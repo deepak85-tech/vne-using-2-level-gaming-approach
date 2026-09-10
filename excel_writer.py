@@ -9,7 +9,7 @@ SUMMARY_HEADERS = [
 ]
 
 def write_results(filename, summary_rows, strategy_rows, accepted_rows,
-                  resource_rows, pricing_rows):
+                  resource_rows, pricing_rows, log_lines=None):
     wb = Workbook()
     ws = wb.active
     ws.title = "Summary"
@@ -45,6 +45,11 @@ def write_results(filename, summary_rows, strategy_rows, accepted_rows,
         ws5.append(headers)
         for row in pricing_rows:
             ws5.append([row.get(h, "") for h in headers])
+
+    ws6 = wb.create_sheet("Logs")
+    ws6.append(["Line", "Log Message"])
+    for i, message in enumerate(log_lines or [], start=1):
+        ws6.append([i, message])
 
     for wsx in wb.worksheets:
         wsx.freeze_panes = "A2"

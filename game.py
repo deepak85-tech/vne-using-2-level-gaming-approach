@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import Counter
 
 from dijkstra import edge_key, shortest_feasible_path
 from utility import calculate_revenue, calculate_cost, calculate_utility
@@ -7,12 +8,38 @@ from candidate_strategies import get_candidate_strategies
 
 class LowerLevelGame:
 
-    def __init__(self, physical_network, cpu_price=0.50, bw_price=0.20):
+    def __init__(
+        self,
+        physical_network,
+        cpu_price=0.50,
+        bw_price=0.20
+    ):
         self.network = physical_network
         self.cpu_price = cpu_price
         self.bw_price = bw_price
 
-    def check_and_evaluate(self, vnr, strategy, resources):
+    @staticmethod
+    def normalize_vnr(vnr):
+
+        return {
+            "id": vnr["id"],
+
+            "nodes": dict(
+                vnr["nodes"]
+            ),
+
+            "links": {
+                (u, v): bw
+                for u, v, bw in vnr["links"]
+            }
+        }
+
+    def check_and_evaluate(
+        self,
+        vnr,
+        strategy,
+        resources
+    ):
 
         mapping = strategy["mapping"]
 
@@ -21,40 +48,21 @@ class LowerLevelGame:
 
         revenue = calculate_revenue(vnr)
 
-        # -------------------------------------------------
-        # 1. CPU FEASIBILITY
-        # -------------------------------------------------
-
         node_used = {}
 
         for virtual_node, required_cpu in vnr["nodes"].items():
 
-            physical_node = mapping[virtual_node]
+            physical_node = mapping[
+                virtual_node
+            ]
 
             if physical_node not in cpu:
-                return {
-                    "feasible": False,
-                    "reason": f"Unknown physical node {physical_node}",
-                    "mapping": mapping,
-                    "paths": {},
-                    "utility": None,
-                    "revenue": revenue,
-                    "total_cost": None,
-                }
-
-            node_used[physical_node] = (
-                node_used.get(physical_node, 0)
-                + required_cpu
-            )
-
-            if node_used[physical_node] > cpu[physical_node]:
 
                 return {
                     "feasible": False,
                     "reason":
-                        f"CPU violation at {physical_node}: "
-                        f"required {node_used[physical_node]} "
-                        f"> available {cpu[physical_node]}",
+                        f"Unknown physical node "
+                        f"{physical_node}",
                     "mapping": mapping,
                     "paths": {},
                     "utility": None,
@@ -62,23 +70,54 @@ class LowerLevelGame:
                     "total_cost": None,
                 }
 
-        # -------------------------------------------------
-        # 2. BANDWIDTH FEASIBILITY + DIJKSTRA
-        # -------------------------------------------------
+            node_used[
+                physical_node
+            ] = (
+                node_used.get(
+                    physical_node,
+                    0
+                )
+                + required_cpu
+            )
 
-        # Temporary copy.
-        # We don't modify the real network until
-        # the strategy is finally selected.
+            if (
+                node_used[physical_node]
+                > cpu[physical_node]
+            ):
+
+                return {
+                    "feasible": False,
+                    "reason":
+                        f"CPU violation at "
+                        f"{physical_node}: "
+                        f"required "
+                        f"{node_used[physical_node]} > "
+                        f"available "
+                        f"{cpu[physical_node]}",
+                    "mapping": mapping,
+                    "paths": {},
+                    "utility": None,
+                    "revenue": revenue,
+                    "total_cost": None,
+                }
+
         temp_bw = deepcopy(bw)
 
         paths = {}
 
-        for (virtual_u, virtual_v), required_bw in vnr["links"].items():
+        for (
+            virtual_u,
+            virtual_v
+        ), required_bw in vnr["links"].items():
 
-            source = mapping[virtual_u]
-            target = mapping[virtual_v]
+            source = mapping[
+                virtual_u
+            ]
 
-            # Find shortest path having enough bandwidth.
+            target = mapping[
+                virtual_v
+            ]
+
             path = shortest_feasible_path(
                 temp_bw,
                 source,
@@ -91,9 +130,10 @@ class LowerLevelGame:
                 return {
                     "feasible": False,
                     "reason":
-                        f"No BW-feasible path for "
-                        f"{virtual_u}-{virtual_v} "
-                        f"requiring {required_bw}",
+                        f"No BW-feasible path "
+                        f"for {virtual_u}-{virtual_v} "
+                        f"requiring "
+                        f"{required_bw} BW",
                     "mapping": mapping,
                     "paths": {},
                     "utility": None,
@@ -101,12 +141,19 @@ class LowerLevelGame:
                     "total_cost": None,
                 }
 
-            paths[(virtual_u, virtual_v)] = path
+            paths[
+                (virtual_u, virtual_v)
+            ] = path
 
-            # Temporarily reserve bandwidth.
-            for a, b in zip(path, path[1:]):
+            for a, b in zip(
+                path,
+                path[1:]
+            ):
 
-                key = edge_key(a, b)
+                key = edge_key(
+                    a,
+                    b
+                )
 
                 temp_bw[key] -= required_bw
 
@@ -115,7 +162,8 @@ class LowerLevelGame:
                     return {
                         "feasible": False,
                         "reason":
-                            f"Bandwidth violation on {a}-{b}",
+                            f"Bandwidth violation "
+                            f"on {a}-{b}",
                         "mapping": mapping,
                         "paths": paths,
                         "utility": None,
@@ -123,20 +171,12 @@ class LowerLevelGame:
                         "total_cost": None,
                     }
 
-        # -------------------------------------------------
-        # 3. CALCULATE COST
-        # -------------------------------------------------
-
         total_cost, cpu_cost, bw_cost = calculate_cost(
             vnr,
             paths,
             self.cpu_price,
             self.bw_price
         )
-
-        # -------------------------------------------------
-        # 4. CALCULATE UTILITY
-        # -------------------------------------------------
 
         utility = calculate_utility(
             revenue,
@@ -146,38 +186,30 @@ class LowerLevelGame:
         return {
             "feasible": True,
             "reason": "Feasible",
-
             "mapping": mapping,
-
             "paths": paths,
-
             "utility": utility,
-
             "revenue": revenue,
-
             "total_cost": total_cost,
-
             "cpu_cost": cpu_cost,
-
             "bw_cost": bw_cost,
-
             "resulting_bw": temp_bw,
-
             "cpu_used": node_used,
         }
 
-    # -----------------------------------------------------
-    # BEST RESPONSE
-    # -----------------------------------------------------
+    def best_response(
+        self,
+        vnr,
+        resources
+    ):
 
-    def best_response(self, vnr, resources):
-
-        # Get physical node names automatically.
-        physical_nodes = list(resources["cpu"].keys())
+        physical_nodes = list(
+            resources["cpu"].keys()
+        )
 
         candidates = get_candidate_strategies(
-        vnr,
-        physical_nodes
+            vnr,
+            physical_nodes
         )
 
         evaluations = []
@@ -192,19 +224,20 @@ class LowerLevelGame:
 
             result["strategy"] = strategy["name"]
 
-            evaluations.append(result)
+            evaluations.append(
+                result
+            )
 
-        # Keep only feasible strategies.
         feasible = [
-            x for x in evaluations
+            x
+            for x in evaluations
             if x["feasible"]
         ]
 
-        # No feasible strategy.
         if not feasible:
+
             return None, evaluations
 
-        # Highest utility = best response.
         best = max(
             feasible,
             key=lambda x: x["utility"]
@@ -212,9 +245,24 @@ class LowerLevelGame:
 
         return best, evaluations
 
-    # -----------------------------------------------------
-    # PLAY LOWER-LEVEL GAME
-    # -----------------------------------------------------
+    @staticmethod
+    def _mapping_text(mapping):
+
+        return " | ".join(
+            f"{k}->{v}"
+            for k, v in mapping.items()
+        )
+
+    @staticmethod
+    def _paths_text(paths):
+
+        return " | ".join(
+            f"{u}-{v}:"
+            f"{'->'.join(path)}"
+            f" ({len(path) - 1} hop(s))"
+            for (u, v), path
+            in paths.items()
+        )
 
     def play(self, vnrs):
 
@@ -224,159 +272,560 @@ class LowerLevelGame:
 
         accepted_rows = []
 
-        # Larger CPU request acts first.
+        log_lines = []
+
+        resource_history = []
+
+        vnrs = [
+            self.normalize_vnr(vnr)
+            for vnr in vnrs
+        ]
+
+        # ======================================================
+        # ORDER VNRs BY CPU + BANDWIDTH
+        # ======================================================
+
         ordered = sorted(
             vnrs,
-            key=lambda v: sum(v["nodes"].values()),
+            key=lambda v: (
+                sum(v["nodes"].values())
+                +
+                sum(v["links"].values())
+            ),
             reverse=True
         )
 
+        log_lines.append(
+            "=" * 78
+        )
+
+        log_lines.append(
+            "TWO-LEVEL VNE LOWER-LEVEL DECISION LOG"
+        )
+
+        log_lines.append(
+            "=" * 78
+        )
+
+        log_lines.append("")
+
+        log_lines.append(
+            f"CPU price = {self.cpu_price} | "
+            f"BW price = {self.bw_price}"
+        )
+
+        log_lines.append("")
+
+        log_lines.append(
+            "PROCESSING ORDER"
+        )
+
+        log_lines.append(
+            "VNRs are processed from higher "
+            "CPU + BW demand to lower demand."
+        )
+
+        log_lines.append("")
+
+        for index, vnr in enumerate(
+            ordered,
+            start=1
+        ):
+
+            cpu_request = sum(
+                vnr["nodes"].values()
+            )
+
+            bw_request = sum(
+                vnr["links"].values()
+            )
+
+            total_request = (
+                cpu_request
+                + bw_request
+            )
+
+            log_lines.append(
+                f"{index}. {vnr['id']} -> "
+                f"CPU={cpu_request}, "
+                f"BW={bw_request}, "
+                f"CPU+BW={total_request}"
+            )
+
+        log_lines.append("")
+
+        # ======================================================
+        # PROCESS EACH VNR
+        # ======================================================
+
         for vnr in ordered:
+
+            # ----------------------------------------------
+            # SAVE RESOURCES BEFORE THIS VNR
+            # ----------------------------------------------
+
+            vnr_resources_before = {
+                "cpu": dict(
+                    resources["cpu"]
+                ),
+                "bw": dict(
+                    resources["bw"]
+                )
+            }
 
             best, evaluations = self.best_response(
                 vnr,
                 resources
             )
 
-            # ---------------------------------------------
-            # Store every evaluated strategy
-            # ---------------------------------------------
+            cpu_request = sum(
+                vnr["nodes"].values()
+            )
+
+            bw_request = sum(
+                vnr["links"].values()
+            )
+
+            total_request = (
+                cpu_request
+                + bw_request
+            )
+
+            revenue = calculate_revenue(
+                vnr
+            )
+
+            feasible = [
+                e
+                for e in evaluations
+                if e["feasible"]
+            ]
+
+            infeasible = [
+                e
+                for e in evaluations
+                if not e["feasible"]
+            ]
+
+            log_lines.append(
+                "-" * 78
+            )
+
+            log_lines.append(
+                f"VNR: {vnr['id']}"
+            )
+
+            log_lines.append(
+                f"CPU requested: {cpu_request}"
+            )
+
+            log_lines.append(
+                f"BW requested: {bw_request}"
+            )
+
+            log_lines.append(
+                f"CPU + BW: {total_request}"
+            )
+
+            log_lines.append(
+                f"Revenue: {revenue}"
+            )
+
+            log_lines.append(
+                f"Candidate mappings generated: "
+                f"{len(evaluations)}"
+            )
+
+            log_lines.append(
+                f"Feasible mappings: "
+                f"{len(feasible)}"
+            )
+
+            log_lines.append(
+                f"Rejected mappings: "
+                f"{len(infeasible)}"
+            )
+
+            # ----------------------------------------------
+            # REJECTED
+            # ----------------------------------------------
+
+            if best is None:
+
+                reason_counts = Counter(
+                    e["reason"]
+                    for e in infeasible
+                )
+
+                log_lines.append("")
+
+                log_lines.append(
+                    "DECISION: REJECTED"
+                )
+
+                log_lines.append(
+                    "Reason: No complete feasible "
+                    "embedding was found."
+                )
+
+                if reason_counts:
+
+                    log_lines.append(
+                        "Rejection reasons:"
+                    )
+
+                    for reason, count in (
+                        reason_counts.most_common()
+                    ):
+
+                        log_lines.append(
+                            f"  - {count} candidate(s): "
+                            f"{reason}"
+                        )
+
+                vnr_resources_after = {
+                    "cpu": dict(
+                        resources["cpu"]
+                    ),
+                    "bw": dict(
+                        resources["bw"]
+                    )
+                }
+
+                resource_history.append({
+                    "VNR": vnr["id"],
+                    "before": vnr_resources_before,
+                    "after": vnr_resources_after
+                })
+
+                log_lines.append("")
+
+            # ----------------------------------------------
+            # ACCEPTED
+            # ----------------------------------------------
+
+            else:
+
+                log_lines.append("")
+
+                log_lines.append(
+                    "DECISION: ACCEPTED"
+                )
+
+                log_lines.append(
+                    f"Selected strategy: "
+                    f"{best['strategy']}"
+                )
+
+                log_lines.append(
+                    "FINAL ACCEPTED MAPPING: "
+                    f"{self._mapping_text(best['mapping'])}"
+                )
+
+                log_lines.append(
+                    "Physical paths: "
+                    f"{self._paths_text(best['paths'])}"
+                )
+
+                log_lines.append(
+                    f"Revenue: "
+                    f"{best['revenue']}"
+                )
+
+                log_lines.append(
+                    f"CPU cost: "
+                    f"{best['cpu_cost']}"
+                )
+
+                log_lines.append(
+                    f"BW cost: "
+                    f"{best['bw_cost']}"
+                )
+
+                log_lines.append(
+                    f"Total cost: "
+                    f"{best['total_cost']}"
+                )
+
+                log_lines.append(
+                    f"Utility: "
+                    f"{best['utility']}"
+                )
+
+                # ------------------------------------------
+                # SAME UTILITY MAPPINGS
+                # ------------------------------------------
+
+                same_utility = []
+
+                for evaluation in feasible:
+
+                    if evaluation["utility"] is None:
+                        continue
+
+                    if round(
+                        float(evaluation["utility"]),
+                        8
+                    ) == round(
+                        float(best["utility"]),
+                        8
+                    ):
+
+                        same_utility.append(
+                            evaluation
+                        )
+
+                if len(same_utility) > 1:
+
+                    log_lines.append("")
+
+                    log_lines.append(
+                        "MAPPINGS WITH SAME UTILITY:"
+                    )
+
+                    for number, evaluation in enumerate(
+                        same_utility,
+                        start=1
+                    ):
+
+                        log_lines.append(
+                            f"{number}. "
+                            f"{self._mapping_text(evaluation['mapping'])}"
+                        )
+
+                    log_lines.append(
+                        f"Same utility value: "
+                        f"{best['utility']}"
+                    )
+
+                # ------------------------------------------
+                # UPDATE CPU
+                # ------------------------------------------
+
+                resources["cpu"] = dict(
+                    resources["cpu"]
+                )
+
+                for physical, used in (
+                    best["cpu_used"].items()
+                ):
+
+                    resources["cpu"][physical] -= used
+
+                # ------------------------------------------
+                # UPDATE BW
+                # ------------------------------------------
+
+                resources["bw"] = dict(
+                    best["resulting_bw"]
+                )
+
+                # ------------------------------------------
+                # SAVE RESOURCES AFTER THIS VNR
+                # ------------------------------------------
+
+                vnr_resources_after = {
+                    "cpu": dict(
+                        resources["cpu"]
+                    ),
+                    "bw": dict(
+                        resources["bw"]
+                    )
+                }
+
+                resource_history.append({
+                    "VNR": vnr["id"],
+                    "before": vnr_resources_before,
+                    "after": vnr_resources_after
+                })
+
+                log_lines.append("")
+
+            # ==================================================
+            # STRATEGY ROWS
+            # ==================================================
 
             for e in evaluations:
 
-                mapping_text = " | ".join(
-                    f"{k}->{v}"
-                    for k, v in e["mapping"].items()
-                )
+                decision = "REJECTED"
 
-                paths_text = " | ".join(
-                    f"{u}-{v}:{'->'.join(path)}"
-                    for (u, v), path
-                    in e["paths"].items()
-                )
-
-                if best and e["strategy"] == best["strategy"]:
+                if (
+                    best
+                    and e is best
+                ):
                     decision = "SELECTED"
 
-                elif not e["feasible"]:
-                    decision = "REJECTED"
-
-                else:
+                elif e["feasible"]:
                     decision = "NOT SELECTED"
 
                 all_strategy_rows.append({
 
-                    "VNR": vnr["id"],
+                    "VNR":
+                        vnr["id"],
 
-                    "Strategy": e["strategy"],
+                    "CPU_Demand":
+                        cpu_request,
+
+                    "BW_Demand":
+                        bw_request,
+
+                    "Total_Demand":
+                        total_request,
+
+                    "Strategy":
+                        e["strategy"],
 
                     "Feasible":
-                        "YES" if e["feasible"] else "NO",
+                        "YES"
+                        if e["feasible"]
+                        else "NO",
 
-                    "Decision": decision,
+                    "Decision":
+                        decision,
 
-                    "Mapping": mapping_text,
+                    "Mapping":
+                        self._mapping_text(
+                            e["mapping"]
+                        ),
 
-                    "Paths": paths_text,
+                    "Paths":
+                        self._paths_text(
+                            e["paths"]
+                        )
+                        if e["paths"]
+                        else "",
 
-                    "Revenue": e["revenue"],
+                    "Revenue":
+                        e["revenue"],
 
-                    "CPU_Cost": e.get("cpu_cost"),
+                    "CPU_Cost":
+                        e.get("cpu_cost"),
 
-                    "BW_Cost": e.get("bw_cost"),
+                    "BW_Cost":
+                        e.get("bw_cost"),
 
-                    "Total_Cost": e.get("total_cost"),
+                    "Total_Cost":
+                        e.get("total_cost"),
 
-                    "Utility": e.get("utility"),
+                    "Utility":
+                        e.get("utility"),
 
-                    "Reason": e["reason"],
+                    "Reason":
+                        e["reason"],
                 })
 
-            # ---------------------------------------------
-            # If no feasible mapping
-            # ---------------------------------------------
+            # ==================================================
+            # ACCEPTED ROW
+            # ==================================================
 
             if best is None:
 
                 accepted_rows.append({
 
-                    "VNR": vnr["id"],
+                    "VNR":
+                        vnr["id"],
 
-                    "Accepted": "NO",
+                    "Accepted":
+                        "NO",
 
-                    "Revenue": 0,
+                    "Revenue":
+                        0,
 
-                    "Cost": 0,
+                    "Cost":
+                        0,
 
-                    "Utility": 0,
+                    "Utility":
+                        0,
 
-                    "Mapping": "",
+                    "Mapping":
+                        "",
 
-                    "Paths": "",
+                    "Paths":
+                        "",
                 })
 
-                continue
+            else:
 
-            # ---------------------------------------------
-            # RESERVE CPU
-            # ---------------------------------------------
+                accepted_rows.append({
 
-            resources["cpu"] = dict(
-                resources["cpu"]
+                    "VNR":
+                        vnr["id"],
+
+                    "Accepted":
+                        "YES",
+
+                    "Revenue":
+                        best["revenue"],
+
+                    "Cost":
+                        best["total_cost"],
+
+                    "Utility":
+                        best["utility"],
+
+                    "Mapping":
+                        self._mapping_text(
+                            best["mapping"]
+                        ),
+
+                    "Paths":
+                        self._paths_text(
+                            best["paths"]
+                        ),
+                })
+
+        # ======================================================
+        # FINAL LOG
+        # ======================================================
+
+        log_lines.append(
+            "-" * 78
+        )
+
+        log_lines.append(
+            "FINAL REMAINING RESOURCES"
+        )
+
+        log_lines.append(
+            "CPU: "
+            + ", ".join(
+                f"{node}={value}"
+                for node, value
+                in resources["cpu"].items()
             )
+        )
 
-            for physical, used in best["cpu_used"].items():
-
-                resources["cpu"][physical] -= used
-
-            # ---------------------------------------------
-            # RESERVE BANDWIDTH
-            # ---------------------------------------------
-
-            resources["bw"] = dict(
-                best["resulting_bw"]
+        log_lines.append(
+            "BW: "
+            + ", ".join(
+                f"{u}-{v}={value}"
+                for (u, v), value
+                in resources["bw"].items()
             )
+        )
 
-            # ---------------------------------------------
-            # STORE ACCEPTED VNR
-            # ---------------------------------------------
-
-            mapping_text = " | ".join(
-                f"{k}->{v}"
-                for k, v in best["mapping"].items()
-            )
-
-            paths_text = " | ".join(
-                f"{u}-{v}:{'->'.join(path)}"
-                for (u, v), path
-                in best["paths"].items()
-            )
-
-            accepted_rows.append({
-
-                "VNR": vnr["id"],
-
-                "Accepted": "YES",
-
-                "Revenue": best["revenue"],
-
-                "Cost": best["total_cost"],
-
-                "Utility": best["utility"],
-
-                "Mapping": mapping_text,
-
-                "Paths": paths_text,
-            })
+        log_lines.append("")
 
         return {
 
-            "resources": resources,
+            "resources":
+                resources,
 
-            "strategies": all_strategy_rows,
+            "strategies":
+                all_strategy_rows,
 
-            "accepted": accepted_rows,
+            "accepted":
+                accepted_rows,
 
             "ordered_vnrs":
-                [v["id"] for v in ordered],
+                [
+                    v["id"]
+                    for v in ordered
+                ],
+
+            "logs":
+                log_lines,
+
+            "resource_history":
+                resource_history,
         }

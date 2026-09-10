@@ -1,66 +1,45 @@
-TWO-LEVEL VNE GAME PROJECT
-==========================
+TWO-LEVEL VNE PROJECT
 
-Files
------
-main.py
-    Main program. Runs the fixed-price worked example, runs the upper-level
-    Differential Evolution demonstration, and writes Results.xlsx.
+This version automatically generates virtual-node to physical-node mappings.
+You do not need to manually write mappings in candidate_strategies.py.
 
-physical_network.py
-    Contains the single physical network input:
-    A=10, B=23, C=19, D=16, E=33, F=12 CPU.
-    Links:
-    A-B=15, A-D=8, B-C=9, B-E=18, B-F=12,
-    C-F=8, E-F=30, D-E=19 BW.
+IMPORTANT FILES
+- main.py: starts the experiment and sets CPU/BW prices.
+- vnr_data.py: defines VNR input data.
+- physical_network.py: defines physical nodes and physical links.
+- candidate_strategies.py: automatically generates one-to-one mappings.
+- game.py: checks CPU, uses Dijkstra for bandwidth-feasible paths, calculates cost and utility, and selects the best feasible mapping.
+- dijkstra.py: shortest-path search with bandwidth feasibility.
+- utility.py: revenue, cost, and utility calculations.
+- differential_evolution.py: upper-level price search demonstration.
+- excel_writer.py: creates Results.xlsx including a beginner-friendly Logs sheet.
+- logger.py: writes the same explanation to Execution_Log.txt.
 
-vnr_data.py
-    Contains exactly VNR2 and VNR1.
+OUTPUTS
+1. Results.xlsx
+   - Summary
+   - VNR_Strategies
+   - VNR_Results
+   - Resources
+   - Upper_Level_DE
+   - Logs
 
-candidate_strategies.py
-    Contains three demonstration strategies per VNR:
-    selected, rejected, and feasible-but-lower-utility.
+2. Execution_Log.txt
+   A human-readable explanation of the run, including:
+   - VNR processing order
+   - number of generated mappings
+   - selected virtual-to-physical mapping
+   - Dijkstra physical paths
+   - CPU/BW/total cost
+   - utility
+   - resource updates
+   - rejection reasons
 
-dijkstra.py
-    Shortest feasible path using unit hop count. Bandwidth is checked as
-    a constraint.
+CURRENT WORKED INPUT
+CPU price = 1.0
+BW price = 0.7
 
-utility.py
-    Revenue, price-based resource cost, and utility.
+The current VNR and physical network are the latest project example. VNR1 asks for a virtual link with BW 23, while the largest physical link currently has BW 20, so VNR1 is expected to be rejected under the current bandwidth-feasibility rule.
 
-game.py
-    Lower-level non-cooperative VNR game. Each VNR evaluates its candidate
-    strategies and selects the feasible strategy with highest utility.
-    Accepted resources are then reserved before the next VNR acts.
-
-differential_evolution.py
-    Dependency-free Differential Evolution implementation.
-
-excel_writer.py
-    Writes the results into Results.xlsx.
-
-How to run
------------
-1. Put all .py files in one folder.
-2. Open terminal/PowerShell in that folder.
-3. Run:
-       python main.py
-
-No scipy is required.
-
-Fixed prices
-------------
-CPU price = 0.50
-BW price  = 0.20 per BW per physical hop
-
-Important
----------
-This is a first-phase implementation matching the agreed worked example.
-The candidate strategies are explicitly listed so that the output visibly
-contains:
-- a selected strategy,
-- an infeasible/rejected strategy,
-- a feasible but lower-utility strategy.
-
-For a later full implementation, candidate_strategies.py can be replaced
-with a general embedding-strategy generator.
+RUN
+python main.py

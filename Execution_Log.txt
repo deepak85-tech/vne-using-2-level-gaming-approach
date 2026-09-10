@@ -1,0 +1,193 @@
+================================================================================
+TWO-LEVEL VNE EXECUTION LOG
+================================================================================
+
+Execution time: 2026-09-10 13:26:30
+CPU Price: 0.9
+Bandwidth Price: 0.4
+
+================================================================================
+VNR PROCESSING ORDER
+================================================================================
+
+Rule: CPU + BW demand, highest to lowest
+
+1. VNR2
+   CPU Demand : 50
+   BW Demand  : 46
+   CPU + BW   : 96
+
+2. VNR1
+   CPU Demand : 6
+   BW Demand  : 2
+   CPU + BW   : 8
+
+================================================================================
+VNR: VNR2
+================================================================================
+
+RESOURCE DEMAND
+---------------------------------------------
+CPU Demand : 50
+BW Demand  : 46
+CPU + BW   : 96
+
+MAPPING STATISTICS
+---------------------------------------------
+Mappings Generated : 2520
+Mappings Feasible  : 9
+Mappings Rejected  : 2511
+
+FINAL ACCEPTED MAPPING
+---------------------------------------------
+Mapping: 1->A | 2->E | 3->G | 4->B | 5->D
+Physical Paths: 1-2:A->E (1 hop(s)) | 1-4:A->B (1 hop(s)) | 2-3:E->F->G (2 hop(s)) | 3-5:G->D (1 hop(s)) | 5-4:D->C->B (2 hop(s))
+Revenue: 96
+CPU Cost: 45.0
+Bandwidth Cost: 24.4
+Total Cost: 69.4
+Utility: 26.599999999999994
+Decision: ACCEPTED
+
+CPU BEFORE MAPPING
+---------------------------------------------
+A: 8
+B: 15
+C: 18
+D: 13
+E: 11
+F: 8
+G: 10
+
+BANDWIDTH BEFORE MAPPING
+---------------------------------------------
+A-B: 10
+A-E: 12
+B-C: 16
+C-D: 18
+D-G: 15
+F-G: 20
+E-F: 13
+
+CPU AFTER MAPPING
+---------------------------------------------
+A: Before=8, After=0, Consumed=8
+B: Before=15, After=3, Consumed=12
+C: Before=18, After=18, Consumed=0
+D: Before=13, After=2, Consumed=11
+E: Before=11, After=2, Consumed=9
+F: Before=8, After=8, Consumed=0
+G: Before=10, After=0, Consumed=10
+
+BANDWIDTH AFTER MAPPING
+---------------------------------------------
+A-B: Before=10, After=1, Consumed=9
+A-E: Before=12, After=2, Consumed=10
+B-C: Before=16, After=12, Consumed=4
+C-D: Before=18, After=14, Consumed=4
+D-G: Before=15, After=3, Consumed=12
+F-G: Before=20, After=9, Consumed=11
+E-F: Before=13, After=2, Consumed=11
+
+================================================================================
+VNR: VNR1
+================================================================================
+
+RESOURCE DEMAND
+---------------------------------------------
+CPU Demand : 6
+BW Demand  : 2
+CPU + BW   : 8
+
+MAPPING STATISTICS
+---------------------------------------------
+Mappings Generated : 42
+Mappings Feasible  : 8
+Mappings Rejected  : 34
+
+FINAL ACCEPTED MAPPING
+---------------------------------------------
+Mapping: 1->B | 2->C
+Physical Paths: 1-2:B->C (1 hop(s))
+Revenue: 8
+CPU Cost: 5.4
+Bandwidth Cost: 0.8
+Total Cost: 6.2
+Utility: 1.7999999999999998
+Decision: ACCEPTED
+
+MAPPINGS WITH SAME UTILITY
+---------------------------------------------
+Utility: 1.7999999999999998
+1. 1->B | 2->C
+2. 1->D | 2->C
+3. 1->E | 2->F
+
+CPU BEFORE MAPPING
+---------------------------------------------
+A: 0
+B: 3
+C: 18
+D: 2
+E: 2
+F: 8
+G: 0
+
+BANDWIDTH BEFORE MAPPING
+---------------------------------------------
+A-B: 1
+A-E: 2
+B-C: 12
+C-D: 14
+D-G: 3
+F-G: 9
+E-F: 2
+
+CPU AFTER MAPPING
+---------------------------------------------
+A: Before=0, After=0, Consumed=0
+B: Before=3, After=2, Consumed=1
+C: Before=18, After=13, Consumed=5
+D: Before=2, After=2, Consumed=0
+E: Before=2, After=2, Consumed=0
+F: Before=8, After=8, Consumed=0
+G: Before=0, After=0, Consumed=0
+
+BANDWIDTH AFTER MAPPING
+---------------------------------------------
+A-B: Before=1, After=1, Consumed=0
+A-E: Before=2, After=2, Consumed=0
+B-C: Before=12, After=10, Consumed=2
+C-D: Before=14, After=14, Consumed=0
+D-G: Before=3, After=3, Consumed=0
+F-G: Before=9, After=9, Consumed=0
+E-F: Before=2, After=2, Consumed=0
+
+================================================================================
+FINAL REMAINING RESOURCES
+================================================================================
+
+CPU:
+A: 0
+B: 2
+C: 13
+D: 2
+E: 2
+F: 8
+G: 0
+
+Bandwidth:
+A-B: 1
+A-E: 2
+B-C: 10
+C-D: 14
+D-G: 3
+F-G: 9
+E-F: 2
+
+Total Remaining CPU: 27
+Total Remaining BW: 41
+
+================================================================================
+END OF EXECUTION LOG
+================================================================================
