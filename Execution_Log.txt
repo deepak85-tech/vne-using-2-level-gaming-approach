@@ -1,0 +1,759 @@
+================================================================================
+TWO-LEVEL VNE EXECUTION LOG
+================================================================================
+DATE/TIME : 2026-10-02 19:38:08
+
+CPU PRICE : 0.900000
+B/W PRICE : 0.394531
+
+NUMBER OF PHYSICAL NETWORKS : 10
+NUMBER OF VNRS              : 1
+LOWER LEVEL : NON-COOPERATIVE GAME
+UPPER LEVEL : DIFFERENTIAL EVOLUTION
+================================================================================
+
+VNR PROCESSING ORDER
+================================================================================
+1. VNR1
+   Original ID : vnet_3
+   CPU Demand  : 89.4503
+   B/W Demand  : 285.9926
+   Nodes       : 6
+   Links       : 7
+
+
+================================================================================
+VNR1 DETAILS
+================================================================================
+ORIGINAL ID : vnet_3
+CPU DEMAND  : 89.4503
+B/W DEMAND  : 285.9926
+
+VIRTUAL NODES
+----------------------------------------
+VNode 1 : CPU = 13.2961
+VNode 2 : CPU = 10.9453
+VNode 3 : CPU = 16.8217
+VNode 4 : CPU = 16.6457
+VNode 5 : CPU = 14.0413
+VNode 6 : CPU = 17.7002
+
+VIRTUAL LINKS
+----------------------------------------
+VNode 5 -> VNode 6 : B/W = 49.6280
+VNode 3 -> VNode 6 : B/W = 31.7228
+VNode 1 -> VNode 5 : B/W = 44.4524
+VNode 3 -> VNode 5 : B/W = 45.7696
+VNode 4 -> VNode 5 : B/W = 34.9184
+VNode 2 -> VNode 4 : B/W = 48.7419
+VNode 2 -> VNode 3 : B/W = 30.7595
+
+SELECTED PHYSICAL NETWORK : NONE
+SELECTED STRATEGY          : 
+
+VIRTUAL NODE MAPPING
+----------------------------------------
+None
+
+VIRTUAL LINK MAPPING
+----------------------------------------
+None
+
+PHYSICAL CPU BEFORE
+----------------------------------------
+None
+
+PHYSICAL B/W BEFORE
+----------------------------------------
+None
+
+PHYSICAL CPU AFTER
+----------------------------------------
+None
+
+PHYSICAL B/W AFTER
+----------------------------------------
+None
+
+RESOURCE CONSUMPTION
+----------------------------------------
+CPU Consumed : 0.0000
+B/W Consumed : 0.0000
+CPU Price    : 0.900000
+B/W Price    : 0.394531
+CPU Cost     : 0.0000
+B/W Cost     : 0.0000
+Total Cost   : 0.0000
+Revenue      : 0.0000
+Utility      : 0.0000
+
+STATUS : UNKNOWN
+REASON : 
+
+================================================================================
+NASH GAME INFORMATION
+================================================================================
+Nash Iterations : N/A
+
+================================================================================
+FINAL RESULTS
+================================================================================
+ALGORITHM : MULTI_NETWORK_TWO_LEVEL_GAME
+REVENUE : 375.4429
+TOTAL_COST : 843.3639
+REVENUETOCOSTRATIO : 44.5173
+ACCEPTED : 1
+REJECTED : 0
+TOTAL_REQUEST : 1
+EMBEDDINGRATIO : 100.0
+PRE_RESOURCE : 840000.0
+POST_RESOURCE : 839910.5496949975
+CONSUMED : 89.45030500250868
+AVG_BW : 40.8561
+AVG_CRB : 0.0106
+AVG_LINK : 0.2079
+NO_OF_LINKS_USED : 28
+AVG_NODE : 6.0
+NO_OF_NODES_USED : 6
+AVG_PATH : 6.7143
+AVG_EXEC : 13788.5748
+TOTAL_NODES : 840
+TOTAL_LINKS : 930
+PHYSICAL_NETWORKS : 10
+NASH_ITERATIONS : 2
+
+SELECTED NETWORKS
+----------------------------------------
+VNR1 -> PN1 | Strategy: S109
+
+================================================================================
+SELECTED STRATEGY SUMMARY
+================================================================================
+VNR1 | Network: PN1 | Strategy: S109 | Utility: -467.921
+
+================================================================================
+DIFFERENTIAL EVOLUTION
+================================================================================
+BEST CPU PRICE : 0.900000
+BEST B/W PRICE : 0.394531
+DE OBJECTIVE   : -843.3639
+
+================================================================================
+
+
+================================================================================
+TWO-LEVEL VNE EXECUTION LOG
+================================================================================
+DATE/TIME : 2026-10-03 15:17:03
+
+CPU PRICE : 0.900000
+B/W PRICE : 0.394531
+
+NUMBER OF PHYSICAL NETWORKS : 10
+NUMBER OF VNRS              : 3
+LOWER LEVEL : NON-COOPERATIVE GAME
+UPPER LEVEL : DIFFERENTIAL EVOLUTION
+================================================================================
+
+VNR PROCESSING ORDER
+================================================================================
+1. VNR1
+   Original ID : vnet_5
+   CPU Demand  : 117.2824
+   B/W Demand  : 384.2851
+   Nodes       : 8
+   Links       : 9
+
+2. VNR2
+   Original ID : vnet_8
+   CPU Demand  : 121.2370
+   B/W Demand  : 413.5646
+   Nodes       : 8
+   Links       : 10
+
+3. VNR3
+   Original ID : vnet_3
+   CPU Demand  : 89.4503
+   B/W Demand  : 285.9926
+   Nodes       : 6
+   Links       : 7
+
+
+================================================================================
+VNR1 DETAILS
+================================================================================
+ORIGINAL ID : vnet_5
+CPU DEMAND  : 117.2824
+B/W DEMAND  : 384.2851
+
+VIRTUAL NODES
+----------------------------------------
+VNode 1 : CPU = 11.3280
+VNode 2 : CPU = 15.7266
+VNode 3 : CPU = 15.7947
+VNode 4 : CPU = 17.8780
+VNode 5 : CPU = 11.3602
+VNode 6 : CPU = 18.3330
+VNode 7 : CPU = 12.1881
+VNode 8 : CPU = 14.6737
+
+VIRTUAL LINKS
+----------------------------------------
+VNode 1 -> VNode 4 : B/W = 35.0591
+VNode 2 -> VNode 4 : B/W = 46.8637
+VNode 2 -> VNode 6 : B/W = 39.0097
+VNode 2 -> VNode 3 : B/W = 46.6342
+VNode 2 -> VNode 5 : B/W = 35.0214
+VNode 2 -> VNode 7 : B/W = 31.4529
+VNode 7 -> VNode 8 : B/W = 53.6669
+VNode 5 -> VNode 7 : B/W = 45.0299
+VNode 5 -> VNode 8 : B/W = 51.5472
+
+SELECTED PHYSICAL NETWORK : PN1
+SELECTED STRATEGY          : S125
+
+VIRTUAL NODE MAPPING
+----------------------------------------
+VNode 1 -> Physical Node 78
+VNode 2 -> Physical Node 21
+VNode 3 -> Physical Node 52
+VNode 4 -> Physical Node 43
+VNode 5 -> Physical Node 6
+VNode 6 -> Physical Node 47
+VNode 7 -> Physical Node 71
+VNode 8 -> Physical Node 45
+
+VIRTUAL LINK MAPPING
+----------------------------------------
+VNode 7 -> VNode 8
+Required B/W : 53.6669
+Physical Path : 71 -> 1 -> 45
+Hops          : 2
+VNode 5 -> VNode 8
+Required B/W : 51.5472
+Physical Path : 6 -> 71 -> 1 -> 45
+Hops          : 3
+VNode 2 -> VNode 4
+Required B/W : 46.8637
+Physical Path : 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6 -> 71 -> 1 -> 44 -> 0 -> 43
+Hops          : 11
+VNode 2 -> VNode 3
+Required B/W : 46.6342
+Physical Path : 21 -> 18 -> 31 -> 23 -> 25 -> 5 -> 52
+Hops          : 6
+VNode 5 -> VNode 7
+Required B/W : 45.0299
+Physical Path : 6 -> 71
+Hops          : 1
+VNode 2 -> VNode 6
+Required B/W : 39.0097
+Physical Path : 21 -> 61 -> 69 -> 46 -> 47
+Hops          : 4
+VNode 1 -> VNode 4
+Required B/W : 35.0591
+Physical Path : 78 -> 47 -> 46 -> 69 -> 61 -> 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6 -> 71 -> 1 -> 44 -> 0 -> 43
+Hops          : 16
+VNode 2 -> VNode 5
+Required B/W : 35.0214
+Physical Path : 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6
+Hops          : 6
+VNode 2 -> VNode 7
+Required B/W : 31.4529
+Physical Path : 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6 -> 71
+Hops          : 7
+
+PHYSICAL CPU BEFORE
+----------------------------------------
+21 : 1000.0000
+43 : 1000.0000
+45 : 1000.0000
+47 : 1000.0000
+52 : 1000.0000
+6 : 1000.0000
+71 : 1000.0000
+78 : 1000.0000
+
+PHYSICAL B/W BEFORE
+----------------------------------------
+0->43 : 1000.0000
+0->44 : 1000.0000
+1->44 : 1000.0000
+1->45 : 1000.0000
+1->71 : 1000.0000
+18->21 : 1000.0000
+18->22 : 1000.0000
+18->31 : 1000.0000
+20->22 : 1000.0000
+20->48 : 1000.0000
+21->61 : 1000.0000
+23->25 : 1000.0000
+23->31 : 1000.0000
+25->5 : 1000.0000
+46->47 : 1000.0000
+46->69 : 1000.0000
+47->78 : 1000.0000
+48->54 : 1000.0000
+5->52 : 1000.0000
+54->6 : 1000.0000
+6->71 : 1000.0000
+61->69 : 1000.0000
+
+PHYSICAL CPU AFTER
+----------------------------------------
+21 : 984.2734
+43 : 982.1220
+45 : 985.3263
+47 : 981.6670
+52 : 984.2053
+6 : 988.6398
+71 : 987.8119
+78 : 988.6720
+
+PHYSICAL B/W AFTER
+----------------------------------------
+0->43 : 918.0771
+0->44 : 918.0771
+1->44 : 918.0771
+1->45 : 894.7859
+1->71 : 812.8630
+18->21 : 804.9686
+18->22 : 851.6029
+18->31 : 953.3658
+20->22 : 851.6029
+20->48 : 851.6029
+21->61 : 925.9312
+23->25 : 953.3658
+23->31 : 953.3658
+25->5 : 953.3658
+46->47 : 925.9312
+46->69 : 925.9312
+47->78 : 964.9409
+48->54 : 851.6029
+5->52 : 953.3658
+54->6 : 851.6029
+6->71 : 790.0472
+61->69 : 925.9312
+
+RESOURCE CONSUMPTION
+----------------------------------------
+CPU Consumed : 117.2824
+B/W Consumed : 2249.5951
+CPU Price    : 0.900000
+B/W Price    : 0.394531
+CPU Cost     : 105.5542
+B/W Cost     : 887.5357
+Total Cost   : 993.0899
+Revenue      : 501.5675
+Utility      : -491.5223
+
+STATUS : ACCEPTED
+REASON : Embedding successfully allocated
+
+================================================================================
+VNR2 DETAILS
+================================================================================
+ORIGINAL ID : vnet_8
+CPU DEMAND  : 121.2370
+B/W DEMAND  : 413.5646
+
+VIRTUAL NODES
+----------------------------------------
+VNode 1 : CPU = 12.8787
+VNode 2 : CPU = 13.3271
+VNode 3 : CPU = 13.0626
+VNode 4 : CPU = 15.7213
+VNode 5 : CPU = 16.7521
+VNode 6 : CPU = 17.3640
+VNode 7 : CPU = 15.1840
+VNode 8 : CPU = 16.9473
+
+VIRTUAL LINKS
+----------------------------------------
+VNode 4 -> VNode 7 : B/W = 50.4429
+VNode 3 -> VNode 4 : B/W = 42.4499
+VNode 2 -> VNode 6 : B/W = 52.6363
+VNode 2 -> VNode 3 : B/W = 35.6780
+VNode 2 -> VNode 7 : B/W = 48.6923
+VNode 1 -> VNode 6 : B/W = 33.3136
+VNode 1 -> VNode 8 : B/W = 31.0730
+VNode 3 -> VNode 7 : B/W = 43.8894
+VNode 5 -> VNode 7 : B/W = 35.5334
+VNode 1 -> VNode 5 : B/W = 39.8560
+
+SELECTED PHYSICAL NETWORK : PN2
+SELECTED STRATEGY          : S184
+
+VIRTUAL NODE MAPPING
+----------------------------------------
+VNode 1 -> Physical Node 78
+VNode 2 -> Physical Node 21
+VNode 3 -> Physical Node 52
+VNode 4 -> Physical Node 43
+VNode 5 -> Physical Node 71
+VNode 6 -> Physical Node 47
+VNode 7 -> Physical Node 6
+VNode 8 -> Physical Node 37
+
+VIRTUAL LINK MAPPING
+----------------------------------------
+VNode 2 -> VNode 6
+Required B/W : 52.6363
+Physical Path : 21 -> 61 -> 69 -> 46 -> 47
+Hops          : 4
+VNode 4 -> VNode 7
+Required B/W : 50.4429
+Physical Path : 43 -> 0 -> 44 -> 1 -> 71 -> 6
+Hops          : 5
+VNode 2 -> VNode 7
+Required B/W : 48.6923
+Physical Path : 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6
+Hops          : 6
+VNode 3 -> VNode 7
+Required B/W : 43.8894
+Physical Path : 52 -> 5 -> 25 -> 23 -> 31 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6
+Hops          : 10
+VNode 3 -> VNode 4
+Required B/W : 42.4499
+Physical Path : 52 -> 60 -> 11 -> 55 -> 13 -> 75 -> 29 -> 7 -> 30 -> 45 -> 1 -> 44 -> 0 -> 43
+Hops          : 13
+VNode 1 -> VNode 5
+Required B/W : 39.8560
+Physical Path : 78 -> 47 -> 46 -> 69 -> 61 -> 21 -> 18 -> 22 -> 20 -> 48 -> 54 -> 6 -> 71
+Hops          : 12
+VNode 2 -> VNode 3
+Required B/W : 35.6780
+Physical Path : 21 -> 18 -> 31 -> 23 -> 25 -> 5 -> 52
+Hops          : 6
+VNode 5 -> VNode 7
+Required B/W : 35.5334
+Physical Path : 71 -> 6
+Hops          : 1
+VNode 1 -> VNode 6
+Required B/W : 33.3136
+Physical Path : 78 -> 47
+Hops          : 1
+VNode 1 -> VNode 8
+Required B/W : 31.0730
+Physical Path : 78 -> 47 -> 46 -> 69 -> 61 -> 21 -> 18 -> 31 -> 23 -> 25 -> 5 -> 52 -> 60 -> 37
+Hops          : 13
+
+PHYSICAL CPU BEFORE
+----------------------------------------
+21 : 1000.0000
+37 : 1000.0000
+43 : 1000.0000
+47 : 1000.0000
+52 : 1000.0000
+6 : 1000.0000
+71 : 1000.0000
+78 : 1000.0000
+
+PHYSICAL B/W BEFORE
+----------------------------------------
+0->43 : 1000.0000
+0->44 : 1000.0000
+1->44 : 1000.0000
+1->45 : 1000.0000
+1->71 : 1000.0000
+11->55 : 1000.0000
+11->60 : 1000.0000
+13->55 : 1000.0000
+13->75 : 1000.0000
+18->21 : 1000.0000
+18->22 : 1000.0000
+18->31 : 1000.0000
+20->22 : 1000.0000
+20->48 : 1000.0000
+21->61 : 1000.0000
+23->25 : 1000.0000
+23->31 : 1000.0000
+25->5 : 1000.0000
+29->7 : 1000.0000
+29->75 : 1000.0000
+30->45 : 1000.0000
+30->7 : 1000.0000
+37->60 : 1000.0000
+46->47 : 1000.0000
+46->69 : 1000.0000
+47->78 : 1000.0000
+48->54 : 1000.0000
+5->52 : 1000.0000
+52->60 : 1000.0000
+54->6 : 1000.0000
+6->71 : 1000.0000
+61->69 : 1000.0000
+
+PHYSICAL CPU AFTER
+----------------------------------------
+21 : 986.6729
+37 : 983.0527
+43 : 984.2787
+47 : 982.6360
+52 : 986.9374
+6 : 984.8160
+71 : 983.2479
+78 : 987.1213
+
+PHYSICAL B/W AFTER
+----------------------------------------
+0->43 : 907.1072
+0->44 : 907.1072
+1->44 : 907.1072
+1->45 : 957.5501
+1->71 : 949.5571
+11->55 : 957.5501
+11->60 : 957.5501
+13->55 : 957.5501
+13->75 : 957.5501
+18->21 : 844.7009
+18->22 : 867.5624
+18->31 : 889.3597
+20->22 : 867.5624
+20->48 : 867.5624
+21->61 : 876.4348
+23->25 : 889.3597
+23->31 : 889.3597
+25->5 : 889.3597
+29->7 : 957.5501
+29->75 : 957.5501
+30->45 : 957.5501
+30->7 : 957.5501
+37->60 : 968.9270
+46->47 : 876.4348
+46->69 : 876.4348
+47->78 : 895.7575
+48->54 : 867.5624
+5->52 : 889.3597
+52->60 : 926.4772
+54->6 : 867.5624
+6->71 : 874.1677
+61->69 : 876.4348
+
+RESOURCE CONSUMPTION
+----------------------------------------
+CPU Consumed : 121.2370
+B/W Consumed : 2910.7902
+CPU Price    : 0.900000
+B/W Price    : 0.394531
+CPU Cost     : 109.1133
+B/W Cost     : 1148.3978
+Total Cost   : 1257.5111
+Revenue      : 534.8016
+Utility      : -722.7095
+
+STATUS : ACCEPTED
+REASON : Embedding successfully allocated
+
+================================================================================
+VNR3 DETAILS
+================================================================================
+ORIGINAL ID : vnet_3
+CPU DEMAND  : 89.4503
+B/W DEMAND  : 285.9926
+
+VIRTUAL NODES
+----------------------------------------
+VNode 1 : CPU = 13.2961
+VNode 2 : CPU = 10.9453
+VNode 3 : CPU = 16.8217
+VNode 4 : CPU = 16.6457
+VNode 5 : CPU = 14.0413
+VNode 6 : CPU = 17.7002
+
+VIRTUAL LINKS
+----------------------------------------
+VNode 4 -> VNode 6 : B/W = 49.6280
+VNode 1 -> VNode 4 : B/W = 31.7228
+VNode 2 -> VNode 6 : B/W = 44.4524
+VNode 1 -> VNode 6 : B/W = 45.7696
+VNode 3 -> VNode 6 : B/W = 34.9184
+VNode 3 -> VNode 5 : B/W = 48.7419
+VNode 1 -> VNode 5 : B/W = 30.7595
+
+SELECTED PHYSICAL NETWORK : PN1
+SELECTED STRATEGY          : S115
+
+VIRTUAL NODE MAPPING
+----------------------------------------
+VNode 1 -> Physical Node 37
+VNode 2 -> Physical Node 35
+VNode 3 -> Physical Node 4
+VNode 4 -> Physical Node 9
+VNode 5 -> Physical Node 27
+VNode 6 -> Physical Node 8
+
+VIRTUAL LINK MAPPING
+----------------------------------------
+VNode 4 -> VNode 6
+Required B/W : 49.6280
+Physical Path : 9 -> 8
+Hops          : 1
+VNode 3 -> VNode 5
+Required B/W : 48.7419
+Physical Path : 4 -> 65 -> 5 -> 27
+Hops          : 3
+VNode 1 -> VNode 6
+Required B/W : 45.7696
+Physical Path : 37 -> 60 -> 11 -> 55 -> 13 -> 75 -> 8
+Hops          : 6
+VNode 2 -> VNode 6
+Required B/W : 44.4524
+Physical Path : 35 -> 40 -> 41 -> 43 -> 0 -> 44 -> 1 -> 45 -> 30 -> 7 -> 29 -> 75 -> 8
+Hops          : 12
+VNode 3 -> VNode 6
+Required B/W : 34.9184
+Physical Path : 4 -> 10 -> 9 -> 8
+Hops          : 3
+VNode 1 -> VNode 4
+Required B/W : 31.7228
+Physical Path : 37 -> 60 -> 11 -> 55 -> 10 -> 9
+Hops          : 5
+VNode 1 -> VNode 5
+Required B/W : 30.7595
+Physical Path : 37 -> 60 -> 52 -> 5 -> 27
+Hops          : 4
+
+PHYSICAL CPU BEFORE
+----------------------------------------
+27 : 1000.0000
+35 : 1000.0000
+37 : 1000.0000
+4 : 1000.0000
+8 : 1000.0000
+9 : 1000.0000
+
+PHYSICAL B/W BEFORE
+----------------------------------------
+0->43 : 918.0771
+0->44 : 918.0771
+1->44 : 918.0771
+1->45 : 894.7859
+10->4 : 1000.0000
+10->55 : 1000.0000
+10->9 : 1000.0000
+11->55 : 1000.0000
+11->60 : 1000.0000
+13->55 : 1000.0000
+13->75 : 1000.0000
+27->5 : 1000.0000
+29->7 : 1000.0000
+29->75 : 1000.0000
+30->45 : 1000.0000
+30->7 : 1000.0000
+35->40 : 1000.0000
+37->60 : 1000.0000
+4->65 : 1000.0000
+40->41 : 1000.0000
+41->43 : 1000.0000
+5->52 : 953.3658
+5->65 : 1000.0000
+52->60 : 1000.0000
+75->8 : 1000.0000
+8->9 : 1000.0000
+
+PHYSICAL CPU AFTER
+----------------------------------------
+27 : 985.9587
+35 : 989.0547
+37 : 986.7039
+4 : 983.1783
+8 : 982.2998
+9 : 983.3543
+
+PHYSICAL B/W AFTER
+----------------------------------------
+0->43 : 873.6248
+0->44 : 873.6248
+1->44 : 873.6248
+1->45 : 850.3335
+10->4 : 965.0816
+10->55 : 968.2772
+10->9 : 933.3587
+11->55 : 922.5076
+11->60 : 922.5076
+13->55 : 954.2304
+13->75 : 954.2304
+27->5 : 920.4986
+29->7 : 955.5476
+29->75 : 955.5476
+30->45 : 955.5476
+30->7 : 955.5476
+35->40 : 955.5476
+37->60 : 891.7481
+4->65 : 951.2581
+40->41 : 955.5476
+41->43 : 955.5476
+5->52 : 922.6063
+5->65 : 951.2581
+52->60 : 969.2405
+75->8 : 909.7781
+8->9 : 915.4536
+
+RESOURCE CONSUMPTION
+----------------------------------------
+CPU Consumed : 89.4503
+B/W Consumed : 1390.3071
+CPU Price    : 0.900000
+B/W Price    : 0.394531
+CPU Cost     : 80.5053
+B/W Cost     : 548.5197
+Total Cost   : 629.0249
+Revenue      : 375.4429
+Utility      : -253.5821
+
+STATUS : ACCEPTED
+REASON : Embedding successfully allocated
+
+================================================================================
+NASH GAME INFORMATION
+================================================================================
+Nash Iterations : 2
+
+================================================================================
+FINAL RESULTS
+================================================================================
+ALGORITHM : MULTI_NETWORK_TWO_LEVEL_GAME
+REVENUE : 1411.812
+TOTAL_COST : 2879.6259
+REVENUETOCOSTRATIO : 49.0276
+ACCEPTED : 3
+REJECTED : 0
+TOTAL_REQUEST : 3
+EMBEDDINGRATIO : 100.0
+PRE_RESOURCE : 840000.0
+POST_RESOURCE : 839672.0302028746
+CONSUMED : 327.96979712543543
+AVG_BW : 41.6862
+AVG_CRB : 0.039
+AVG_LINK : 0.7044
+NO_OF_LINKS_USED : 43
+AVG_NODE : 7.3333
+NO_OF_NODES_USED : 14
+AVG_PATH : 6.1923
+AVG_EXEC : 3899.5832
+TOTAL_NODES : 840
+TOTAL_LINKS : 930
+PHYSICAL_NETWORKS : 10
+NASH_ITERATIONS : 2
+
+SELECTED NETWORKS
+----------------------------------------
+VNR1 -> PN1 | Strategy: S125
+VNR2 -> PN2 | Strategy: S184
+VNR3 -> PN1 | Strategy: S115
+
+================================================================================
+SELECTED STRATEGY SUMMARY
+================================================================================
+VNR1 | Network: PN1 | Strategy: S125 | Utility: -491.5223
+VNR2 | Network: PN2 | Strategy: S184 | Utility: -722.7095
+VNR3 | Network: PN1 | Strategy: S115 | Utility: -253.5821
+
+================================================================================
+DIFFERENTIAL EVOLUTION
+================================================================================
+BEST CPU PRICE : 0.900000
+BEST B/W PRICE : 0.394531
+DE OBJECTIVE   : -2879.6259
+
+================================================================================
