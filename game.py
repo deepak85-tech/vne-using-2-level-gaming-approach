@@ -749,6 +749,13 @@ class LowerLevelGame:
                 "utility"
             ]
         )
+        if best["utility"] <= 0:
+            return {
+        "accepted": False,
+        "reason": "No strategy with positive utility",
+        "network_results": all_results,
+        "best_utility": best["utility"]
+        }
 
         best[
             "network_results"
