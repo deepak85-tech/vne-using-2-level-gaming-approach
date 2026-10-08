@@ -16,9 +16,8 @@ from differential_evolution import (
 
 from excel_writer import write_results
 
-from alib_vnr_converter import (
-    generate_random_alib_requests
-)
+# ALIB modules are imported only when their corresponding switch is True.
+# You can independently choose the physical-network source and VNR source.
 
 
 # ==========================================================
@@ -34,7 +33,35 @@ ALIB_ROOT = (
     r"\P3_ALIB_MASTER\P3_ALIB_MASTER"
 )
 
-NUMBER_OF_PHYSICAL_NETWORKS = 10
+NUMBER_OF_PHYSICAL_NETWORKS = 1
+
+# ==========================================================
+# INPUT SOURCES
+# ==========================================================
+# These TWO switches are independent.
+#
+# USE_ALIB_PHYSICAL = True
+#     -> use ALIB physical network
+# USE_ALIB_PHYSICAL = False
+#     -> use your custom physical network
+#
+# USE_ALIB_VNR = True
+#     -> use ALIB-generated VNRs
+# USE_ALIB_VNR = False
+#     -> use your VNRs from vnr_data.py
+#
+# This gives four combinations:
+# 1. True,  True  = ALIB physical + ALIB VNR
+# 2. True,  False = ALIB physical + YOUR VNR
+# 3. False, True  = YOUR physical + ALIB VNR
+# 4. False, False = YOUR physical + YOUR VNR
+
+USE_ALIB_PHYSICAL = True
+USE_ALIB_VNR = True
+
+# Default experiment sizes. You can also pass sizes on the command line,
+# for example: python main.py 10 20 30 40
+DEFAULT_VNR_COUNTS = [10, 20, 30, 40]
 
 MAX_NASH_ITERATIONS = 20
 
@@ -55,29 +82,38 @@ CURRENT_VNRS = []
 # BUILD PHYSICAL NETWORK POOL
 # ==========================================================
 
+# ======================================================
+# EDIT ONLY THIS LINE TO CHANGE VNR EXPERIMENTS
+# ======================================================
+VNR_EXPERIMENTS = [10, 20, 30, 40]
+
 def create_physical_networks():
     """
-    Create PN1 ... PN10.
+    Build the physical-network list according to USE_ALIB_PHYSICAL.
 
-    PN1 is the original ALIB RedBestel substrate.
+    USE_ALIB_PHYSICAL = True:
+        Loads PN1 from the ALIB substrate.
 
-    PN2 ... PN10 are connected topology variants
-    derived from PN1.
+    USE_ALIB_PHYSICAL = False:
+        Loads PN1 from custom_physical_network.py.
+        ALIB physical-network code is not imported or accessed.
     """
 
-    base_network = PhysicalNetwork.from_alib(
-        pickle_file=PICKLE_FILE,
-        alib_root=ALIB_ROOT,
-        scenario_index=0,
-        name="PN1"
-    )
+    if USE_ALIB_PHYSICAL:
+        base_network = PhysicalNetwork.from_alib(
+            pickle_file=PICKLE_FILE,
+            alib_root=ALIB_ROOT,
+            scenario_index=0,
+            name="PN1"
+        )
+    else:
+        from physical_network import get_custom_physical_network
 
-    networks = PhysicalNetwork.create_network_pool(
-        base_network,
-        NUMBER_OF_PHYSICAL_NETWORKS
-    )
+        base_network = get_custom_physical_network(
+            name="PN1"
+        )
 
-    return networks
+    return [base_network]
 
 
 # ==========================================================
@@ -115,9 +151,7 @@ def run_lower_level(
     bw_price,
     physical_networks
 ):
-    """
-    Run the lower-level multi-physical-network Nash game.
-    """
+    """Run the lower-level Nash game on the single ALIB physical network."""
 
     start = time.perf_counter()
 
@@ -429,7 +463,7 @@ def run_lower_level(
     summary = {
 
         "algorithm":
-            "MULTI_NETWORK_TWO_LEVEL_GAME",
+            "SINGLE_PHYSICAL_NETWORK_TWO_LEVEL_GAME",
 
         "revenue":
             round(
@@ -705,196 +739,113 @@ def run_upper_level_de():
 
 
 # ==========================================================
-# MAIN
+# EXPERIMENT RUNNER
 # ==========================================================
 
-def main():
+def run_experiment(vnr_count, experiment_number=None):
+    """Run one independent experiment using the selected input mode."""
 
     global CURRENT_VNRS
 
-    # ======================================================
-    # VNR COUNT
-    # ======================================================
-
-    if len(sys.argv) > 1:
-
-        try:
-
-            vnr_count = int(
-                sys.argv[1]
-            )
-
-        except ValueError:
-
-            print(
-                "Invalid VNR count."
-            )
-
-            print(
-                "Use:"
-            )
-
-            print(
-                "python main.py 50"
-            )
-
-            return
-
+    print()
+    print("=" * 70)
+    if experiment_number is not None:
+        print(f"EXPERIMENT {experiment_number}: {vnr_count} VNRs")
     else:
-
-        vnr_count = 50
-
-    if vnr_count <= 0:
-
-        print(
-            "VNR count must be greater than 0."
-        )
-
-        return
+        print(f"EXPERIMENT: {vnr_count} VNRs")
+    print("ONE PHYSICAL NETWORK: PN1")
+    print(f"PHYSICAL SOURCE   : {'ALIB' if USE_ALIB_PHYSICAL else 'CUSTOM'}")
+    print(f"VNR SOURCE        : {'ALIB' if USE_ALIB_VNR else 'CUSTOM'}")
+    print("=" * 70)
 
     # ======================================================
-    # GENERATE VNRs ONCE
+    # GENERATE VNRs
     # ======================================================
 
-    print(
-        "=" * 70
-    )
+    if USE_ALIB_VNR:
+        print(f"GENERATING {vnr_count} RANDOM ALIB VNRS")
 
-    print(
-        f"GENERATING {vnr_count} "
-        "RANDOM ALIB VNRS"
-    )
+        # Import ALIB only in ALIB mode.
+        from alib_vnr_converter import generate_random_alib_requests
 
-    print(
-        "=" * 70
-    )
-
-    CURRENT_VNRS = (
-        generate_random_alib_requests(
-
+        CURRENT_VNRS = generate_random_alib_requests(
             pickle_file=PICKLE_FILE,
-
             alib_root=ALIB_ROOT,
-
             number_of_requests=vnr_count,
-
             scenario_index=0
         )
-    )
+    else:
+        print(f"LOADING CUSTOM VNRS (requested: {vnr_count})")
 
-    print(
-        f"Generated VNRs: "
-        f"{len(CURRENT_VNRS)}"
-    )
+        from vnr_data import get_vnrs
+
+        custom_vnrs = get_vnrs()
+
+        if vnr_count > len(custom_vnrs):
+            raise ValueError(
+                f"Custom mode has only {len(custom_vnrs)} VNRs, "
+                f"but {vnr_count} were requested. "
+                f"Add more VNRs to vnr_data.py or run a smaller count."
+            )
+
+        CURRENT_VNRS = custom_vnrs[:vnr_count]
+
+    print(f"Generated VNRs: {len(CURRENT_VNRS)}")
 
     # ======================================================
     # VNR DETAILS
     # ======================================================
 
     print()
-    print("=" * 70)
     print("GENERATED VNR DETAILS")
-    print("=" * 70)
+    print("-" * 70)
 
     for vnr in CURRENT_VNRS:
-
-        cpu = sum(
-            vnr["nodes"].values()
-        )
-
-        bw = sum(
-            vnr["links"].values()
-        )
-
+        cpu = sum(vnr["nodes"].values())
+        bw = sum(vnr["links"].values())
         print(
-            f"{vnr['id']} | "
-            f"Nodes: {len(vnr['nodes'])} | "
-            f"CPU: {cpu:.2f} | "
-            f"Links: {len(vnr['links'])} | "
-            f"BW: {bw:.2f}"
+            f"{vnr['id']} | Nodes: {len(vnr['nodes'])} | "
+            f"CPU: {cpu:.2f} | Links: {len(vnr['links'])} | BW: {bw:.2f}"
         )
 
     # ======================================================
-    # CREATE NETWORK POOL
+    # ONE PHYSICAL NETWORK FROM THE SELECTED SOURCE
     # ======================================================
 
-    physical_networks = (
-        create_physical_networks()
-    )
-
-    print_network_information(
-        physical_networks
-    )
+    physical_networks = create_physical_networks()
+    print_network_information(physical_networks)
 
     # ======================================================
     # DIFFERENTIAL EVOLUTION
     # ======================================================
 
-    print(
-        "=" * 70
-    )
+    print("STARTING DIFFERENTIAL EVOLUTION")
+    print("-" * 70)
 
-    print(
-        "STARTING DIFFERENTIAL EVOLUTION"
-    )
-
-    print(
-        "=" * 70
-    )
-
-    best_prices, de_objective = (
-        run_upper_level_de()
-    )
-
-    best_cpu_price = (
-        best_prices[0]
-    )
-
-    best_bw_price = (
-        best_prices[1]
-    )
+    best_prices, de_objective = run_upper_level_de()
+    best_cpu_price = best_prices[0]
+    best_bw_price = best_prices[1]
 
     # ======================================================
     # FINAL LOWER LEVEL
     # ======================================================
 
     print()
-    print(
-        "=" * 70
-    )
+    print("FINAL LOWER-LEVEL NASH GAME")
+    print("-" * 70)
 
-    print(
-        "FINAL LOWER-LEVEL NASH GAME"
-    )
+    # Fresh copy of the same single physical network.
+    physical_networks = create_physical_networks()
 
-    print(
-        "=" * 70
-    )
-
-    # Fresh physical networks for final game.
-    physical_networks = (
-        create_physical_networks()
-    )
-
-    summary, result, resource_rows = (
-        run_lower_level(
-
-            best_cpu_price,
-
-            best_bw_price,
-
-            physical_networks
-        )
+    summary, result, resource_rows = run_lower_level(
+        best_cpu_price,
+        best_bw_price,
+        physical_networks
     )
 
     # ======================================================
     # DETAILED LOGS
     # ======================================================
-
-    # The two text logs contain exactly the same detailed
-    # information. Their only difference is persistence:
-    # Execution_Log.txt      -> append every run
-    # Current_Run_Log.txt    -> overwrite with latest run
 
     log_arguments = dict(
         cpu_price=best_cpu_price,
@@ -924,230 +875,122 @@ def main():
         )
     except Exception as error:
         print("Warning: Current_Run_Log.txt failed:", error)
+
     # ======================================================
     # PRICING ROW
     # ======================================================
 
-    pricing_rows = [
-
-        {
-
-            "Level":
-                "Upper",
-
-            "Method":
-                "Differential Evolution",
-
-            "CPU_Price":
-                round(
-                    best_cpu_price,
-                    6
-                ),
-
-            "BW_Price":
-                round(
-                    best_bw_price,
-                    6
-                ),
-
-            "Role":
-                "Best price vector found by DE",
-
-            "Objective":
-                round(
-                    de_objective,
-                    6
-                )
-        }
-    ]
+    pricing_rows = [{
+        "Level": "Upper",
+        "Method": "Differential Evolution",
+        "CPU_Price": round(best_cpu_price, 6),
+        "BW_Price": round(best_bw_price, 6),
+        "Role": "Best price vector found by DE",
+        "Objective": round(de_objective, 6)
+    }]
 
     # ======================================================
     # EXCEL
     # ======================================================
 
-    output = "Results.xlsx"
+    output = f"Results_{vnr_count}_VNRs.xlsx"
 
     try:
-
         write_results(
-
             output,
-
             [summary],
-
             result["strategies"],
-
             result["accepted"],
-
             resource_rows,
-
             pricing_rows,
-
             result["logs"]
         )
-
     except Exception as error:
-
-        print(
-            "Warning: Excel writing failed:",
-            error
-        )
+        print("Warning: Excel writing failed:", error)
 
     # ======================================================
     # CONSOLE RESULTS
     # ======================================================
 
     print()
-    print(
-        "=" * 70
-    )
-
-    print(
-        "MULTI-NETWORK TWO-LEVEL VNE RESULTS"
-    )
-
-    print(
-        "=" * 70
-    )
-
-    print(
-        f"Physical Networks : "
-        f"{NUMBER_OF_PHYSICAL_NETWORKS}"
-    )
-
-    print(
-        f"VNRs              : "
-        f"{summary['total_request']}"
-    )
-
-    print(
-        f"Best CPU price    : "
-        f"{best_cpu_price:.6f}"
-    )
-
-    print(
-        f"Best BW price     : "
-        f"{best_bw_price:.6f}"
-    )
-
-    print(
-        f"Revenue           : "
-        f"{summary['revenue']}"
-    )
-
-    print(
-        f"Cost              : "
-        f"{summary['total_cost']}"
-    )
-
-    print(
-        f"R/C ratio         : "
-        f"{summary['revenuetocostratio']}%"
-    )
-
-    print(
-        f"Accepted          : "
-        f"{summary['accepted']}/"
-        f"{summary['total_request']}"
-    )
-
-    print(
-        f"Rejected          : "
-        f"{summary['rejected']}"
-    )
-
-    print(
-        f"Embedding         : "
-        f"{summary['embeddingratio']}%"
-    )
-
-    print(
-        f"Nash iterations   : "
-        f"{summary['nash_iterations']}"
-    )
+    print("=" * 70)
+    print("SINGLE-PHYSICAL-NETWORK TWO-LEVEL VNE RESULTS")
+    print("=" * 70)
+    print("Physical Networks : 1 (PN1)")
+    print(f"VNRs              : {summary['total_request']}")
+    print(f"Best CPU price    : {best_cpu_price:.6f}")
+    print(f"Best BW price     : {best_bw_price:.6f}")
+    print(f"Revenue           : {summary['revenue']}")
+    print(f"Cost              : {summary['total_cost']}")
+    print(f"R/C ratio         : {summary['revenuetocostratio']}%")
+    print(f"Accepted          : {summary['accepted']}/{summary['total_request']}")
+    print(f"Rejected          : {summary['rejected']}")
+    print(f"Embedding         : {summary['embeddingratio']}%")
+    print(f"Nash iterations   : {summary['nash_iterations']}")
 
     print()
-
-    # ======================================================
-    # FINAL VNR NETWORK SELECTION
-    # ======================================================
-
-    print(
-        "FINAL VNR NETWORK SELECTION"
-    )
-
-    print(
-        "-" * 70
-    )
+    print("FINAL VNR RESULTS")
+    print("-" * 70)
 
     for row in result["accepted"]:
-
         if row["Accepted"] == "YES":
-
             print(
-
-                f"{row['VNR']} "
-                f"-> {row['Network']} "
-                f"| Utility: "
-                f"{row['Utility']:.4f} "
-                f"| Mapping: "
-                f"{row['Mapping']}"
+                f"{row['VNR']} -> PN1 | Utility: {row['Utility']:.4f} | "
+                f"Mapping: {row['Mapping']}"
             )
-
         else:
-
             print(
-
-                f"{row['VNR']} "
-                f"-> REJECTED "
-                f"| {row.get('Reason', '')}"
+                f"{row['VNR']} -> REJECTED | {row.get('Reason', '')}"
             )
 
     print()
+    print(f"DE best CPU price: {best_cpu_price:.6f}")
+    print(f"DE best BW price : {best_bw_price:.6f}")
+    print(f"DE objective     : {de_objective:.6f}")
+    print(f"Excel saved to   : {output}")
+    print("Current run log : Current_Run_Log.txt")
 
-    # ======================================================
-    # DE INFORMATION
-    # ======================================================
 
-    print(
-        "DE best CPU price:",
-        round(
-            best_cpu_price,
-            6
-        )
-    )
+def main():
+    """
+    Run one or more independent VNR-size experiments.
 
-    print(
-        "DE best BW price :",
-        round(
-            best_bw_price,
-            6
-        )
-    )
+    Examples:
+        python main.py
+        python main.py 10
+        python main.py 10 20 30 40
 
-    print(
-        "DE objective     :",
-        round(
-            de_objective,
-            6
-        )
-    )
+    With no arguments the default experiments are [10, 20, 30, 40].
+    Every experiment uses exactly one fresh copy of the selected PN1
+    topology. There are never PN2, PN3, ... networks.
+    """
+
+    if len(sys.argv) > 1:
+        try:
+            counts = [int(value) for value in sys.argv[1:]]
+        except ValueError:
+            print("Invalid VNR count.")
+            print("Use: python main.py 10 20 30 40")
+            return
+    else:
+        if USE_ALIB_VNR:
+            counts = DEFAULT_VNR_COUNTS
+        else:
+            from vnr_data import get_vnrs
+            counts = [len(get_vnrs())]
+
+    if any(count <= 0 for count in counts):
+        print("All VNR counts must be greater than 0.")
+        return
 
     print()
+    print("VNR EXPERIMENTS:", counts)
+    print(f"PHYSICAL SOURCE: {'ALIB' if USE_ALIB_PHYSICAL else 'CUSTOM'}")
+    print(f"VNR SOURCE     : {'ALIB' if USE_ALIB_VNR else 'CUSTOM'}")
+    print("PHYSICAL NETWORKS: 1")
 
-    # ======================================================
-    # OUTPUT FILES
-    # ======================================================
-
-    print(
-        f"Excel saved to: "
-        f"{output}"
-    )
-
-    print(
-        "Current run log saved to: "
-        "Current_Run_Log.txt"
-    )
+    for experiment_number, vnr_count in enumerate(counts, start=1):
+        run_experiment(vnr_count, experiment_number)
 
 
 # ==========================================================
