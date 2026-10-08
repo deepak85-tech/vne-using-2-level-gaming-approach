@@ -2,11 +2,14 @@ from openpyxl import Workbook
 
 
 SUMMARY_HEADERS = [
+    "experiment",
+    "vnr_count",
     "algorithm",
     "revenue",
     "total_cost",
     "revenuetocostratio",
     "accepted",
+    "rejected",
     "total_request",
     "embeddingratio",
     "pre_resource",
@@ -21,7 +24,9 @@ SUMMARY_HEADERS = [
     "avg_path",
     "avg_exec",
     "total_nodes",
-    "total_links"
+    "total_links",
+    "physical_networks",
+    "nash_iterations"
 ]
 
 
@@ -133,6 +138,60 @@ def write_results(
                 )
             )
             for header in SUMMARY_HEADERS
+        ])
+
+    # =========================================================
+    # EXPERIMENT SUMMARY (compact view)
+    # =========================================================
+
+    ws_exp = workbook.create_sheet(
+        "Experiment_Summary"
+    )
+
+    experiment_headers = [
+        "Experiment",
+        "VNR_Count",
+        "Accepted",
+        "Rejected",
+        "Total_Request",
+        "Embedding_Ratio",
+        "Revenue",
+        "Total_Cost",
+        "Revenue_to_Cost_Ratio",
+        "CPU_Price",
+        "BW_Price",
+        "Nash_Iterations",
+        "DE_Objective"
+    ]
+
+    ws_exp.append(experiment_headers)
+
+    # Pricing rows are one row per experiment.
+    pricing_by_experiment = {
+        row.get("Experiment"): row
+        for row in pricing_rows
+    }
+
+    for row in summary_rows:
+        pricing = pricing_by_experiment.get(
+            row.get("experiment"),
+            {}
+        )
+
+        ws_exp.append([
+            row.get("experiment", ""),
+            row.get("vnr_count", ""),
+            row.get("accepted", ""),
+            row.get("rejected", ""),
+            row.get("total_request", ""),
+            row.get("embeddingratio", ""),
+            row.get("revenue", ""),
+            row.get("total_cost", ""),
+            row.get("revenuetocostratio", ""),
+            pricing.get("CPU_Price", ""),
+            pricing.get("BW_Price", ""),
+            row.get("nash_iterations", ""),
+            pricing.get("Objective", "")
         ])
 
     # =========================================================

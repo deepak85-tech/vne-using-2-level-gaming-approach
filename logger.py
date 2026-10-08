@@ -537,3 +537,113 @@ def write_current_run_log(
     ) as file:
         file.write(content)
         file.write("\n")
+
+# ==========================================================
+# COMBINED MULTI-EXPERIMENT LOGS
+# ==========================================================
+
+def build_experiment_log_content(
+    experiment_number,
+    vnr_count,
+    cpu_price,
+    bw_price,
+    physical_networks,
+    ordered_vnrs,
+    strategy_rows,
+    accepted_rows,
+    resource_history,
+    summary,
+    de_objective,
+    nash_iterations=None
+):
+    """Build one complete experiment section for the combined log."""
+
+    base_content = build_log_content(
+        cpu_price=cpu_price,
+        bw_price=bw_price,
+        physical_networks=physical_networks,
+        ordered_vnrs=ordered_vnrs,
+        strategy_rows=strategy_rows,
+        accepted_rows=accepted_rows,
+        resource_history=resource_history,
+        summary=summary,
+        de_objective=de_objective,
+        nash_iterations=nash_iterations
+    )
+
+    header = [
+        "=" * 80,
+        f"EXPERIMENT {experiment_number} : {vnr_count} VNRs",
+        "ONE FRESH PHYSICAL NETWORK : PN1",
+        "=" * 80,
+        ""
+    ]
+
+    return "\n".join(header) + base_content
+
+
+def _join_experiment_sections(experiment_logs):
+    """Join experiment sections with 8 newline characters (7 blank lines)."""
+
+    cleaned = [
+        str(section).rstrip()
+        for section in experiment_logs
+        if str(section).strip()
+    ]
+
+    return ("\n" * 8).join(cleaned)
+
+
+def write_combined_current_run_log(
+    filename,
+    experiment_logs
+):
+    """Overwrite Current_Run_Log.txt with the complete current run."""
+
+    content = _join_experiment_sections(
+        experiment_logs
+    )
+
+    with open(
+        filename,
+        "w",
+        encoding="utf-8"
+    ) as file:
+        file.write(
+            "=" * 80
+            + "\n"
+            + "TWO-LEVEL VNE COMPLETE CURRENT RUN"
+            + "\n"
+            + "=" * 80
+            + "\n\n"
+        )
+        file.write(content)
+        file.write("\n")
+
+
+def write_combined_execution_log(
+    filename,
+    experiment_logs
+):
+    """Append the complete current run to Execution_Log.txt."""
+
+    content = _join_experiment_sections(
+        experiment_logs
+    )
+
+    with open(
+        filename,
+        "a",
+        encoding="utf-8"
+    ) as file:
+        file.write("\n" * 8)
+        file.write(
+            "=" * 80
+            + "\n"
+            + "TWO-LEVEL VNE COMPLETE EXECUTION RUN"
+            + "\n"
+            + "=" * 80
+            + "\n\n"
+        )
+        file.write(content)
+        file.write("\n")

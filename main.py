@@ -61,7 +61,7 @@ USE_ALIB_VNR = True
 
 # Default experiment sizes. You can also pass sizes on the command line,
 # for example: python main.py 10 20 30 40
-DEFAULT_VNR_COUNTS = [10, 20, 30, 40]
+DEFAULT_VNR_COUNTS = [1, 2, 3, 4]
 
 MAX_NASH_ITERATIONS = 20
 
@@ -85,7 +85,7 @@ CURRENT_VNRS = []
 # ======================================================
 # EDIT ONLY THIS LINE TO CHANGE VNR EXPERIMENTS
 # ======================================================
-VNR_EXPERIMENTS = [10, 20, 30, 40]
+VNR_EXPERIMENTS = [1, 2, 3, 4]
 
 def create_physical_networks():
     """
@@ -107,7 +107,7 @@ def create_physical_networks():
             name="PN1"
         )
     else:
-        from physical_network import get_custom_physical_network
+        from custom_physical_network import get_custom_physical_network
 
         base_network = get_custom_physical_network(
             name="PN1"
@@ -743,7 +743,7 @@ def run_upper_level_de():
 # ==========================================================
 
 def run_experiment(vnr_count, experiment_number=None):
-    """Run one independent experiment using the selected input mode."""
+    """Run one independent experiment using one fresh PN1."""
 
     global CURRENT_VNRS
 
@@ -764,8 +764,6 @@ def run_experiment(vnr_count, experiment_number=None):
 
     if USE_ALIB_VNR:
         print(f"GENERATING {vnr_count} RANDOM ALIB VNRS")
-
-        # Import ALIB only in ALIB mode.
         from alib_vnr_converter import generate_random_alib_requests
 
         CURRENT_VNRS = generate_random_alib_requests(
@@ -776,7 +774,6 @@ def run_experiment(vnr_count, experiment_number=None):
         )
     else:
         print(f"LOADING CUSTOM VNRS (requested: {vnr_count})")
-
         from vnr_data import get_vnrs
 
         custom_vnrs = get_vnrs()
@@ -809,16 +806,10 @@ def run_experiment(vnr_count, experiment_number=None):
         )
 
     # ======================================================
-    # ONE PHYSICAL NETWORK FROM THE SELECTED SOURCE
-    # ======================================================
-
-    physical_networks = create_physical_networks()
-    print_network_information(physical_networks)
-
-    # ======================================================
     # DIFFERENTIAL EVOLUTION
     # ======================================================
 
+    print()
     print("STARTING DIFFERENTIAL EVOLUTION")
     print("-" * 70)
 
@@ -834,7 +825,8 @@ def run_experiment(vnr_count, experiment_number=None):
     print("FINAL LOWER-LEVEL NASH GAME")
     print("-" * 70)
 
-    # Fresh copy of the same single physical network.
+    # This is a fresh PN1 for this experiment.
+    # Experiment 1, 2, 3 and 4 therefore do not share resources.
     physical_networks = create_physical_networks()
 
     summary, result, resource_rows = run_lower_level(
@@ -844,7 +836,7 @@ def run_experiment(vnr_count, experiment_number=None):
     )
 
     # ======================================================
-    # DETAILED LOGS
+    # EXPERIMENT LOG DATA
     # ======================================================
 
     log_arguments = dict(
@@ -860,21 +852,15 @@ def run_experiment(vnr_count, experiment_number=None):
         nash_iterations=result.get("iterations", 0),
     )
 
-    try:
-        write_execution_log(
-            filename="Execution_Log.txt",
-            **log_arguments
-        )
-    except Exception as error:
-        print("Warning: Execution_Log.txt failed:", error)
+    # Build the complete text for this experiment.
+    # It is returned to main(), which writes all four experiments together.
+    from logger import build_experiment_log_content
 
-    try:
-        write_current_run_log(
-            filename="Current_Run_Log.txt",
-            **log_arguments
-        )
-    except Exception as error:
-        print("Warning: Current_Run_Log.txt failed:", error)
+    experiment_log = build_experiment_log_content(
+        experiment_number=experiment_number,
+        vnr_count=vnr_count,
+        **log_arguments
+    )
 
     # ======================================================
     # PRICING ROW
@@ -888,25 +874,6 @@ def run_experiment(vnr_count, experiment_number=None):
         "Role": "Best price vector found by DE",
         "Objective": round(de_objective, 6)
     }]
-
-    # ======================================================
-    # EXCEL
-    # ======================================================
-
-    output = f"Results_{vnr_count}_VNRs.xlsx"
-
-    try:
-        write_results(
-            output,
-            [summary],
-            result["strategies"],
-            result["accepted"],
-            resource_rows,
-            pricing_rows,
-            result["logs"]
-        )
-    except Exception as error:
-        print("Warning: Excel writing failed:", error)
 
     # ======================================================
     # CONSOLE RESULTS
@@ -947,37 +914,50 @@ def run_experiment(vnr_count, experiment_number=None):
     print(f"DE best CPU price: {best_cpu_price:.6f}")
     print(f"DE best BW price : {best_bw_price:.6f}")
     print(f"DE objective     : {de_objective:.6f}")
-    print(f"Excel saved to   : {output}")
-    print("Current run log : Current_Run_Log.txt")
+
+    return {
+        "experiment_number": experiment_number,
+        "vnr_count": vnr_count,
+        "summary": summary,
+        "strategies": result["strategies"],
+        "accepted": result["accepted"],
+        "resource_rows": resource_rows,
+        "pricing_rows": pricing_rows,
+        "logs": result.get("logs", []),
+        "experiment_log": experiment_log,
+        "de_objective": de_objective,
+        "cpu_price": best_cpu_price,
+        "bw_price": best_bw_price,
+    }
 
 
 def main():
     """
-    Run one or more independent VNR-size experiments.
+    Run four independent VNR-size experiments by default:
 
-    Examples:
-        python main.py
-        python main.py 10
-        python main.py 10 20 30 40
+        Experiment 1 -> 1 VNR
+        Experiment 2 -> 2 VNRs
+        Experiment 3 -> 3 VNRs
+        Experiment 4 -> 4 VNRs
 
-    With no arguments the default experiments are [10, 20, 30, 40].
-    Every experiment uses exactly one fresh copy of the selected PN1
-    topology. There are never PN2, PN3, ... networks.
+    One python main.py command therefore processes 10 VNR entries in total.
+    Every experiment starts with a fresh copy of PN1.
+
+    All four experiments are written into ONE Results.xlsx file.
+    Current_Run_Log.txt is overwritten with the complete current run.
+    Execution_Log.txt appends the complete current run to its history.
     """
 
     if len(sys.argv) > 1:
         try:
             counts = [int(value) for value in sys.argv[1:]]
         except ValueError:
-            print("Invalid VNR count.")
-            print("Use: python main.py 10 20 30 40")
+            print("Invalid VNR count(s).")
+            print("Use: python main.py")
+            print("or : python main.py 1 2 3 4")
             return
     else:
-        if USE_ALIB_VNR:
-            counts = DEFAULT_VNR_COUNTS
-        else:
-            from vnr_data import get_vnrs
-            counts = [len(get_vnrs())]
+        counts = VNR_EXPERIMENTS
 
     if any(count <= 0 for count in counts):
         print("All VNR counts must be greater than 0.")
@@ -985,12 +965,152 @@ def main():
 
     print()
     print("VNR EXPERIMENTS:", counts)
-    print(f"PHYSICAL SOURCE: {'ALIB' if USE_ALIB_PHYSICAL else 'CUSTOM'}")
-    print(f"VNR SOURCE     : {'ALIB' if USE_ALIB_VNR else 'CUSTOM'}")
-    print("PHYSICAL NETWORKS: 1")
+    print(f"PHYSICAL SOURCE : {'ALIB' if USE_ALIB_PHYSICAL else 'CUSTOM'}")
+    print(f"VNR SOURCE      : {'ALIB' if USE_ALIB_VNR else 'CUSTOM'}")
+    print("PHYSICAL NETWORKS: 1 (fresh PN1 for each experiment)")
+    print("TOTAL VNR ENTRIES:", sum(counts))
+
+    experiment_results = []
+
+    # ======================================================
+    # RUN ALL EXPERIMENTS
+    # ======================================================
 
     for experiment_number, vnr_count in enumerate(counts, start=1):
-        run_experiment(vnr_count, experiment_number)
+        result = run_experiment(
+            vnr_count,
+            experiment_number
+        )
+        experiment_results.append(result)
+
+    # ======================================================
+    # COMBINED TEXT LOGS
+    # ======================================================
+
+    # The same complete four-experiment content is used for both files.
+    # Current_Run_Log -> overwrite latest run
+    # Execution_Log   -> append latest run
+    from logger import (
+        write_combined_execution_log,
+        write_combined_current_run_log
+    )
+
+    experiment_logs = [
+        item["experiment_log"]
+        for item in experiment_results
+    ]
+
+    try:
+        write_combined_current_run_log(
+            filename="Current_Run_Log.txt",
+            experiment_logs=experiment_logs
+        )
+    except Exception as error:
+        print(
+            "Warning: Current_Run_Log.txt failed:",
+            error
+        )
+
+    try:
+        write_combined_execution_log(
+            filename="Execution_Log.txt",
+            experiment_logs=experiment_logs
+        )
+    except Exception as error:
+        print(
+            "Warning: Execution_Log.txt failed:",
+            error
+        )
+
+    # ======================================================
+    # COMBINED EXCEL DATA
+    # ======================================================
+
+    all_summary_rows = []
+    all_strategy_rows = []
+    all_accepted_rows = []
+    all_resource_rows = []
+    all_pricing_rows = []
+    all_log_lines = []
+
+    for item in experiment_results:
+        experiment_number = item["experiment_number"]
+        vnr_count = item["vnr_count"]
+
+        # Summary rows
+        summary_row = dict(item["summary"])
+        summary_row["experiment"] = experiment_number
+        summary_row["vnr_count"] = vnr_count
+        all_summary_rows.append(summary_row)
+
+        # VNR strategy rows
+        for row in item["strategies"]:
+            new_row = dict(row)
+            new_row["Experiment"] = experiment_number
+            new_row["VNR_Count"] = vnr_count
+            all_strategy_rows.append(new_row)
+
+        # Complete VNR result rows
+        for row in item["accepted"]:
+            new_row = dict(row)
+            new_row["Experiment"] = experiment_number
+            new_row["VNR_Count"] = vnr_count
+            all_accepted_rows.append(new_row)
+
+        # Resource rows
+        for row in item["resource_rows"]:
+            new_row = dict(row)
+            new_row["Experiment"] = experiment_number
+            new_row["VNR_Count"] = vnr_count
+            all_resource_rows.append(new_row)
+
+        # DE pricing rows
+        for row in item["pricing_rows"]:
+            new_row = dict(row)
+            new_row["Experiment"] = experiment_number
+            new_row["VNR_Count"] = vnr_count
+            all_pricing_rows.append(new_row)
+
+        # Preserve the detailed result log lines in Excel too.
+        all_log_lines.append(
+            f"EXPERIMENT {experiment_number} : {vnr_count} VNRs"
+        )
+        all_log_lines.extend(item["logs"])
+        all_log_lines.extend(["", "", "", "", "", "", "", ""])
+
+    # ======================================================
+    # ONE RESULTS FILE
+    # ======================================================
+
+    output = "Results.xlsx"
+
+    try:
+        write_results(
+            output,
+            all_summary_rows,
+            all_strategy_rows,
+            all_accepted_rows,
+            all_resource_rows,
+            all_pricing_rows,
+            all_log_lines
+        )
+
+        print()
+        print("=" * 70)
+        print("ALL EXPERIMENTS COMPLETED")
+        print("=" * 70)
+        print("Experiments      :", len(experiment_results))
+        print("VNR counts       :", counts)
+        print("Total VNR entries:", sum(counts))
+        print("Excel saved to   : Results.xlsx")
+        print("Current run log  : Current_Run_Log.txt")
+        print("Execution log    : Execution_Log.txt")
+
+    except Exception as error:
+        print(
+            "Warning: Excel writing failed:",
+            error
+        )
 
 
 # ==========================================================
