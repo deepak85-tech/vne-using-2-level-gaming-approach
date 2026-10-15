@@ -85,7 +85,7 @@ CURRENT_VNRS = []
 # ======================================================
 # EDIT ONLY THIS LINE TO CHANGE VNR EXPERIMENTS
 # ======================================================
-VNR_EXPERIMENTS = [1, 2, 3, 4]
+VNR_EXPERIMENTS = [100,150,200,500]
 
 def create_physical_networks():
     """
