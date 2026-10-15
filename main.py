@@ -61,7 +61,7 @@ USE_ALIB_VNR = True
 
 # Default experiment sizes. You can also pass sizes on the command line,
 # for example: python main.py 10 20 30 40
-DEFAULT_VNR_COUNTS = [1, 2, 3, 4]
+DEFAULT_VNR_COUNTS = [100,150,200,500]
 
 MAX_NASH_ITERATIONS = 20
 
