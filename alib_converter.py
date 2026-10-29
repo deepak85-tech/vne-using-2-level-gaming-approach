@@ -88,7 +88,7 @@ def convert_alib_substrate(
 
         # The ALIB RedBestel substrate in this scenario
         # uses 100 CPU capacity per physical node.
-        cpu_capacity = 55.0
+        cpu_capacity = 150.0
 
         nodes.append(
             (str(node), cpu_capacity)
@@ -119,7 +119,7 @@ def convert_alib_substrate(
 
         # ALIB RedBestel scenario uses
         # 100 bandwidth capacity per physical edge.
-        bandwidth = 19.0
+        bandwidth = 60.0
 
         links.append(
             (u, v, bandwidth)
