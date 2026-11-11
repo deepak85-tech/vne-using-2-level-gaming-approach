@@ -1,0 +1,31 @@
+[1mdiff --git a/main.py b/main.py[m
+[1mindex e8e2fc8..9ba2581 100644[m
+[1m--- a/main.py[m
+[1m+++ b/main.py[m
+[36m@@ -24,14 +24,11 @@[m [mfrom excel_writer import write_results[m
+ # CONFIGURATION[m
+ # ==========================================================[m
+ [m
+[31m-PICKLE_FILE = ([m
+[31m-    r"D:\minwith log\input\senario_RedBestel.pickle"[m
+[31m-)[m
+[32m+[m[32mfrom pathlib import Path[m
+ [m
+[31m-ALIB_ROOT = ([m
+[31m-    r"D:\mini project resources"[m
+[31m-    r"\P3_ALIB_MASTER\P3_ALIB_MASTER"[m
+[31m-)[m
+[32m+[m[32mPROJECT_DIR = Path(__file__).resolve().parent[m
+[32m+[m[32mPICKLE_FILE = str(PROJECT_DIR / "input" / "senario_RedBestel.pickle")[m
+[32m+[m[32mALIB_ROOT = str(Path.home() / "alib-py3")[m
+ [m
+ NUMBER_OF_PHYSICAL_NETWORKS = 1[m
+ [m
+[36m@@ -790,7 +787,6 @@[m [mdef run_experiment(vnr_count, experiment_number=None):[m
+     print(f"Generated VNRs: {len(CURRENT_VNRS)}")[m
+ [m
+     # ======================================================[m
+[31m-    # VNR DETAILS[m
+     # ======================================================[m
+ [m
+     print()[m

@@ -1,19 +1,27 @@
+
 import os
 import sys
 import pickle
+from pathlib import Path
 
 
-def load_alib_pickle(pickle_file, alib_root):
-    """
-    Load the ALIB scenario pickle.
-    """
+PROJECT_DIR = Path(__file__).resolve().parent
+PICKLE_FILE = PROJECT_DIR / "input" / "senario_RedBestel.pickle"
+ALIB_ROOT = Path.home() / "alib-py3"
+
+
+def load_alib_pickle(pickle_file=PICKLE_FILE, alib_root=ALIB_ROOT):
+    """Load the ALIB scenario pickle."""
+
+    alib_root = str(alib_root)
+    pickle_file = Path(pickle_file)
 
     if alib_root not in sys.path:
         sys.path.insert(0, alib_root)
 
-    if not os.path.exists(pickle_file):
+    if not pickle_file.exists():
         raise FileNotFoundError(
-            f"Pickle file not found:\n{pickle_file}"
+            f"Pickle file not found: {pickle_file}"
         )
 
     with open(pickle_file, "rb") as file:
@@ -23,14 +31,10 @@ def load_alib_pickle(pickle_file, alib_root):
 
 
 def get_scenario(data, scenario_index=0):
-    """
-    Get one scenario from the ALIB ScenarioParameterContainer.
-    """
+    """Get one scenario from the ALIB ScenarioParameterContainer."""
 
     if not hasattr(data, "scenario_list"):
-        raise ValueError(
-            "The pickle does not contain scenario_list."
-        )
+        raise ValueError("The pickle does not contain scenario_list.")
 
     if scenario_index >= len(data.scenario_list):
         raise IndexError(
@@ -42,140 +46,58 @@ def get_scenario(data, scenario_index=0):
 
 
 def convert_alib_substrate(
-    pickle_file,
-    alib_root,
+    pickle_file=PICKLE_FILE,
+    alib_root=ALIB_ROOT,
     scenario_index=0
 ):
-    """
-    Convert an ALIB substrate into the format used
-    by PhysicalNetwork.
-
-    Returns:
-
-        nodes = [
-            (node_id, cpu_capacity),
-            ...
-        ]
-
-        links = [
-            (node1, node2, bandwidth_capacity),
-            ...
-        ]
-    """
-
-    data = load_alib_pickle(
-        pickle_file,
-        alib_root
-    )
-
-    scenario = get_scenario(
-        data,
-        scenario_index
-    )
-
+    data = load_alib_pickle(pickle_file, alib_root)
+    scenario = get_scenario(data, scenario_index)
     substrate = scenario.substrate
 
-    # ---------------------------------------------------------
-    # PHYSICAL NODES
-    # ---------------------------------------------------------
-
+    # Physical nodes
     nodes = []
 
-    for node in sorted(
-        substrate.nodes,
-        key=lambda x: str(x)
-    ):
+    for node in sorted(substrate.nodes, key=lambda x: str(x)):
+        cpu_capacity = 290.0
+        nodes.append((str(node), cpu_capacity))
 
-        # The ALIB RedBestel substrate in this scenario
-        # uses 100 CPU capacity per physical node.
-        cpu_capacity = 150.0
-
-        nodes.append(
-            (str(node), cpu_capacity)
-        )
-
-    # ---------------------------------------------------------
-    # PHYSICAL LINKS
-    # ---------------------------------------------------------
-
+    # Physical links
     unique_links = set()
 
     for u, v in substrate.edges:
-
         if u == v:
             continue
 
-        link = tuple(
-            sorted(
-                (str(u), str(v))
-            )
-        )
-
+        link = tuple(sorted((str(u), str(v))))
         unique_links.add(link)
 
     links = []
 
     for u, v in sorted(unique_links):
-
-        # ALIB RedBestel scenario uses
-        # 100 bandwidth capacity per physical edge.
-        bandwidth = 60.0
-
-        links.append(
-            (u, v, bandwidth)
-        )
+        bandwidth = 180.0
+        links.append((u, v, bandwidth))
 
     return nodes, links
 
-def print_alib_summary(nodes, links):
 
+def print_alib_summary(nodes, links):
     print()
     print("=" * 70)
     print("ALIB SUBSTRATE")
-    print("=" * 70)
+    print(f"Physical nodes: {len(nodes)}")
+    print(f"Physical links: {len(links)}")
 
-    print(f"Physical nodes : {len(nodes)}")
-    print(f"Physical links : {len(links)}")
-
-    print()
-    print("First 10 physical nodes:")
-
+    print("\nFirst 10 physical nodes:")
     for node in nodes[:10]:
         print(node)
 
-    print()
-    print("First 10 physical links:")
-
+    print("\nFirst 10 physical links:")
     for link in links[:10]:
         print(link)
 
-    print()
     print("=" * 70)
 
 
 if __name__ == "__main__":
-
-    # ---------------------------------------------------------
-    # CHANGE THESE TWO PATHS IF REQUIRED
-    # ---------------------------------------------------------
-
-    PICKLE_FILE = r"input\senario_RedBestel.pickle"
-
-    ALIB_ROOT = r"D:\mini project resources\P3_ALIB_MASTER\P3_ALIB_MASTER"
-
-    # Scenario:
-    # 0 = scenario_0.0_rep_0
-    # 1 = scenario_1.0_rep_0
-
-    SCENARIO_INDEX = 0
-
-    nodes, links = convert_alib_substrate(
-        PICKLE_FILE,
-        ALIB_ROOT,
-        SCENARIO_INDEX
-    )
-
-    print_alib_summary(
-        nodes,
-        links
-    )
+    nodes, links = convert_alib_substrate()
+    print_alib_summary(nodes, links)

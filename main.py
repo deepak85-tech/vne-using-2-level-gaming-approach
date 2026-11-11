@@ -1,6 +1,6 @@
 import sys
 import time
-
+from pathlib import Path
 from logger import (
     write_execution_log,
     write_current_run_log
@@ -24,13 +24,14 @@ from excel_writer import write_results
 # CONFIGURATION
 # ==========================================================
 
-PICKLE_FILE = (
-    r"D:\minwith log\input\senario_RedBestel.pickle"
+PROJECT_DIR = Path(__file__).resolve().parent
+
+PICKLE_FILE = str(
+    PROJECT_DIR / "input" / "senario_RedBestel.pickle"
 )
 
-ALIB_ROOT = (
-    r"D:\mini project resources"
-    r"\P3_ALIB_MASTER\P3_ALIB_MASTER"
+ALIB_ROOT = str(
+    Path.home() / "alib-py3"
 )
 
 NUMBER_OF_PHYSICAL_NETWORKS = 1
@@ -61,7 +62,7 @@ USE_ALIB_VNR = True
 
 # Default experiment sizes. You can also pass sizes on the command line,
 # for example: python main.py 10 20 30 40
-DEFAULT_VNR_COUNTS = [100,150,200,500]
+DEFAULT_VNR_COUNTS = [50,100,150,200,250]
 
 MAX_NASH_ITERATIONS = 20
 
@@ -85,7 +86,7 @@ CURRENT_VNRS = []
 # ======================================================
 # EDIT ONLY THIS LINE TO CHANGE VNR EXPERIMENTS
 # ======================================================
-VNR_EXPERIMENTS = [100,150,200,500]
+VNR_EXPERIMENTS = [50,100,150,200,250]
 
 def create_physical_networks():
     """
@@ -948,16 +949,7 @@ def main():
     Execution_Log.txt appends the complete current run to its history.
     """
 
-    if len(sys.argv) > 1:
-        try:
-            counts = [int(value) for value in sys.argv[1:]]
-        except ValueError:
-            print("Invalid VNR count(s).")
-            print("Use: python main.py")
-            print("or : python main.py 1 2 3 4")
-            return
-    else:
-        counts = VNR_EXPERIMENTS
+    counts = VNR_EXPERIMENTS
 
     if any(count <= 0 for count in counts):
         print("All VNR counts must be greater than 0.")
